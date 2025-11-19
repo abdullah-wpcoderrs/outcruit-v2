@@ -1,0 +1,21 @@
+{
+    "name": "Outcruit",
+    "short_name": "Outcruit",
+    "description": "Recruitment workflow automation",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#1E40AF",
+    "background_color": "#F8F9FA",
+    "display": "standalone",
+    "start_url": "/"
+}
