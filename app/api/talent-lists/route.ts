@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
-import { jwtVerify } from 'jose';
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+import { verifyToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
     try {
@@ -11,8 +9,11 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { payload } = await jwtVerify(token, JWT_SECRET);
-        const userId = payload.sub as string;
+        const payload = await verifyToken(token);
+        if (!payload) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const userId = (payload.userId || payload.sub) as string;
 
         const client = await pool.connect();
         try {
