@@ -6,6 +6,7 @@ import { JobAdCard } from "@/components/dashboard/job-ad-card"
 import { TalentListCard } from "@/components/dashboard/talent-list-card"
 import { TrackerTable } from "@/components/history/tracker-table"
 import AuthenticatedLayout from "@/components/authenticated-layout"
+import { Button } from "@/components/ui/button"
 
 interface JobAd {
     id: string
@@ -39,6 +40,9 @@ export default function HistoryPage() {
     const [talentLists, setTalentLists] = useState<TalentList[]>([])
     const [trackerData, setTrackerData] = useState<TrackerItem[]>([])
     const [loading, setLoading] = useState(true)
+    const [preview, setPreview] = useState<{ fileId: string; title: string } | null>(null)
+    const [deletingAds, setDeletingAds] = useState<Set<string>>(new Set())
+    const [deletingTalent, setDeletingTalent] = useState<Set<string>>(new Set())
 
     useEffect(() => {
         fetchData()
@@ -59,6 +63,78 @@ export default function HistoryPage() {
             console.error("Failed to fetch history data", error)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const openPreview = (fileId: string, title: string) => {
+        setPreview({ fileId, title })
+    }
+
+    const closePreview = () => {
+        setPreview(null)
+    }
+
+    const openNewTab = (fileId: string) => {
+        window.open(`/api/files/${fileId}`, '_blank', 'noopener,noreferrer')
+    }
+
+    const downloadFile = async (fileId: string, title: string) => {
+        try {
+            const res = await fetch(`/api/files/${fileId}`)
+            if (!res.ok) return
+            const blob = await res.blob()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            const dispo = res.headers.get('Content-Disposition') || ''
+            const match = dispo.match(/filename="(.+?)"/)
+            a.download = match?.[1] || `${title}.pdf`
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            URL.revokeObjectURL(url)
+        } catch (e) {}
+    }
+
+    const deleteJobAd = async (id: string) => {
+        setDeletingAds(prev => new Set(prev).add(id))
+        setJobAds(prev => prev.filter(ad => ad.id !== id))
+        try {
+            const res = await fetch(`/api/job-ads/${id}`, { method: 'DELETE' })
+            if (!res.ok) {
+                const adsRes = await fetch('/api/job-ads')
+                if (adsRes.ok) setJobAds(await adsRes.json())
+            }
+        } catch (e) {
+            const adsRes = await fetch('/api/job-ads')
+            if (adsRes.ok) setJobAds(await adsRes.json())
+        } finally {
+            setDeletingAds(prev => {
+                const next = new Set(prev)
+                next.delete(id)
+                return next
+            })
+        }
+    }
+
+    const deleteTalentList = async (id: string) => {
+        setDeletingTalent(prev => new Set(prev).add(id))
+        setTalentLists(prev => prev.filter(t => t.id !== id))
+        try {
+            const res = await fetch(`/api/talent-lists/${id}`, { method: 'DELETE' })
+            if (!res.ok) {
+                const listsRes = await fetch('/api/talent-lists')
+                if (listsRes.ok) setTalentLists(await listsRes.json())
+            }
+        } catch (e) {
+            const listsRes = await fetch('/api/talent-lists')
+            if (listsRes.ok) setTalentLists(await listsRes.json())
+        } finally {
+            setDeletingTalent(prev => {
+                const next = new Set(prev)
+                next.delete(id)
+                return next
+            })
         }
     }
 
@@ -173,9 +249,15 @@ export default function HistoryPage() {
                                 {jobAds.map((ad) => (
                                     <JobAdCard
                                         key={ad.id}
+                                        id={ad.id}
                                         jobTitle={ad.job_title}
                                         fileId={ad.file_id}
                                         createdAt={ad.created_at}
+                                        onOpen={openPreview}
+                                        onOpenNewTab={openNewTab}
+                                        onDownload={downloadFile}
+                                        onDelete={deleteJobAd}
+                                        isDeleting={deletingAds.has(ad.id)}
                                     />
                                 ))}
                             </div>
@@ -192,10 +274,16 @@ export default function HistoryPage() {
                                 {talentLists.map((list) => (
                                     <TalentListCard
                                         key={list.id}
+                                        id={list.id}
                                         jobTitle={list.job_title}
                                         fileId={list.file_id}
                                         candidateCount={list.candidate_count}
                                         createdAt={list.created_at}
+                                        onOpen={openPreview}
+                                        onOpenNewTab={openNewTab}
+                                        onDownload={downloadFile}
+                                        onDelete={deleteTalentList}
+                                        isDeleting={deletingTalent.has(list.id)}
                                     />
                                 ))}
                             </div>
@@ -212,6 +300,24 @@ export default function HistoryPage() {
                         />
                     </TabsContent>
                 </Tabs>
+                {preview && (
+                    <div className="fixed inset-0 z-50">
+                        <div className="absolute inset-0 bg-black/50" onClick={closePreview} />
+                        <div className="absolute right-0 top-0 h-full w-full max-w-2xl bg-background shadow-xl flex flex-col">
+                            <div className="p-4 border-b flex items-center justify-between">
+                                <div className="font-semibold text-base line-clamp-1">{preview.title}</div>
+                                <div className="flex gap-2">
+                                    <Button variant="outline" onClick={() => openNewTab(preview.fileId)}>Open in new tab</Button>
+                                    <Button variant="outline" onClick={() => downloadFile(preview.fileId, preview.title)}>Download</Button>
+                                    <Button variant="ghost" size="icon" onClick={closePreview}>×</Button>
+                                </div>
+                            </div>
+                            <div className="flex-1">
+                                <iframe src={`/api/files/${preview.fileId}`} className="w-full h-full" title={preview.title} />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </AuthenticatedLayout>
     )
