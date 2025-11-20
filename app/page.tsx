@@ -1,51 +1,37 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import LoginPage from "@/components/login-page"
-import Dashboard from "@/components/dashboard"
-import { supabase } from "@/lib/supabase"
 
 export default function Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     // Check current session
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (session?.user) {
-        setIsLoggedIn(true)
-        setUserId(session.user.id)
+      try {
+        const res = await fetch('/api/auth/me')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.user) {
+            setIsLoggedIn(true)
+            setUserId(data.user.id)
+            router.push('/dashboard')
+          }
+        }
+      } catch (error) {
+        console.error('Session check failed', error)
+      } finally {
+        setIsLoading(false)
       }
-      
-      setIsLoading(false)
     }
 
     checkSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setIsLoggedIn(true)
-        setUserId(session.user.id)
-      } else {
-        setIsLoggedIn(false)
-        setUserId(null)
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    setIsLoggedIn(false)
-    setUserId(null)
-  }
+  }, [router])
 
   if (isLoading) {
     return (
@@ -58,13 +44,12 @@ export default function Page() {
     )
   }
 
-  return isLoggedIn && userId ? (
-    <Dashboard onLogout={handleLogout} />
-  ) : (
+  return (
     <LoginPage
       onLogin={(id) => {
         setIsLoggedIn(true)
         setUserId(id)
+        router.push('/dashboard')
       }}
     />
   )

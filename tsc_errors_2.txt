@@ -1,0 +1,15 @@
+.next/dev/types/validator.ts(62,39): error TS2307: Cannot find module '../../../app/test-supabase/page.js' or its corresponding type declarations.
+.next/types/validator.ts(80,39): error TS2307: Cannot find module '../../app/test-supabase/page.js' or its corresponding type declarations.
+app/api/auth/login/route.ts(15,30): error TS2304: Cannot find name 'db'.
+app/api/auth/me/route.ts(20,30): error TS2304: Cannot find name 'db'.
+app/api/auth/signup/route.ts(14,36): error TS2304: Cannot find name 'db'.
+app/api/auth/signup/route.ts(23,30): error TS2304: Cannot find name 'db'.
+app/api/notifications/[id]/route.ts(24,15): error TS2304: Cannot find name 'db'.
+app/api/notifications/clear-all/route.ts(20,15): error TS2304: Cannot find name 'db'.
+app/api/notifications/mark-all-read/route.ts(20,15): error TS2304: Cannot find name 'db'.
+app/api/notifications/mark-read/route.ts(21,15): error TS2304: Cannot find name 'db'.
+components/header.tsx(6,42): error TS2307: Cannot find module '@/hooks/use-realtime-notifications' or its corresponding type declarations.
+components/notification-panel.tsx(4,42): error TS2307: Cannot find module '@/hooks/use-realtime-notifications' or its corresponding type declarations.
+components/notification-panel.tsx(108,35): error TS7006: Parameter 'notification' implicitly has an 'any' type.
+scripts/test-db.ts(8,27): error TS2304: Cannot find name 'db'.
+scripts/test-db.ts(21,15): error TS2304: Cannot find name 'db'.

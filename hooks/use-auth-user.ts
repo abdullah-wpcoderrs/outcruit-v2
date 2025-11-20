@@ -1,10 +1,10 @@
 // Hook to get current authenticated user
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 
 export interface AuthUser {
   id: string
   email: string
+  name?: string
 }
 
 export function useAuthUser() {
@@ -13,35 +13,27 @@ export function useAuthUser() {
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (user?.email) {
-        setUser({
-          id: user.id,
-          email: user.email
-        })
+      try {
+        const res = await fetch('/api/auth/me')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.user) {
+            setUser(data.user)
+          } else {
+            setUser(null)
+          }
+        } else {
+          setUser(null)
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error)
+        setUser(null)
+      } finally {
+        setIsLoading(false)
       }
-      
-      setIsLoading(false)
     }
 
     getUser()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user?.email) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email
-        })
-      } else {
-        setUser(null)
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
   }, [])
 
   return { user, isLoading }

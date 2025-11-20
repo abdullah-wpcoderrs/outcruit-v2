@@ -1,0 +1,26 @@
+app/api/auth/login/route.ts(2,10): error TS2305: Module '"@/lib/db"' has no exported member 'db'.
+app/api/auth/me/route.ts(4,10): error TS2305: Module '"@/lib/db"' has no exported member 'db'.
+app/api/auth/signup/route.ts(2,10): error TS2305: Module '"@/lib/db"' has no exported member 'db'.
+app/api/notifications/[id]/route.ts(2,10): error TS2305: Module '"@/lib/db"' has no exported member 'db'.
+app/api/notifications/clear-all/route.ts(2,10): error TS2305: Module '"@/lib/db"' has no exported member 'db'.
+app/api/notifications/mark-all-read/route.ts(2,10): error TS2305: Module '"@/lib/db"' has no exported member 'db'.
+app/api/notifications/mark-read/route.ts(2,10): error TS2305: Module '"@/lib/db"' has no exported member 'db'.
+app/api/webhooks/notifications/route.ts(2,10): error TS2305: Module '"@/lib/db"' has no exported member 'db'.
+app/page.tsx(6,26): error TS2307: Cannot find module '@/lib/supabase' or its corresponding type declarations.
+app/page.tsx(29,73): error TS7006: Parameter '_event' implicitly has an 'any' type.
+app/page.tsx(29,81): error TS7006: Parameter 'session' implicitly has an 'any' type.
+app/test-supabase/page.tsx(4,26): error TS2307: Cannot find module '@/lib/supabase' or its corresponding type declarations.
+app/test-supabase/page.tsx(22,21): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+app/test-supabase/page.tsx(33,21): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+app/test-supabase/page.tsx(41,19): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+app/test-supabase/page.tsx(48,19): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+components/login-page.tsx(6,26): error TS2307: Cannot find module '@/lib/supabase' or its corresponding type declarations.
+hooks/use-auth-user.ts(3,26): error TS2307: Cannot find module '@/lib/supabase' or its corresponding type declarations.
+hooks/use-auth-user.ts(31,73): error TS7006: Parameter '_event' implicitly has an 'any' type.
+hooks/use-auth-user.ts(31,81): error TS7006: Parameter 'session' implicitly has an 'any' type.
+hooks/use-realtime-notifications.ts(4,53): error TS2307: Cannot find module '@/lib/supabase' or its corresponding type declarations.
+hooks/use-realtime-notifications.ts(5,33): error TS2307: Cannot find module '@supabase/supabase-js' or its corresponding type declarations.
+hooks/use-realtime-notifications.ts(45,42): error TS7006: Parameter 'n' implicitly has an 'any' type.
+hooks/use-realtime-notifications.ts(174,10): error TS7006: Parameter 'payload' implicitly has an 'any' type.
+lib/notification-helpers.ts(3,35): error TS2307: Cannot find module './notification-storage' or its corresponding type declarations.
+scripts/test-db.ts(2,10): error TS2305: Module '"../lib/db"' has no exported member 'db'.

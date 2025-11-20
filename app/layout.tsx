@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${anekTamil.className} antialiased`}>
+      <body className={`${anekTamil.className} antialiased`} suppressHydrationWarning>
         <NotificationProvider>
           {children}
         </NotificationProvider>

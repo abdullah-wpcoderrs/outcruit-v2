@@ -3,7 +3,6 @@
 import type React from "react"
 import { useState } from "react"
 import { Lock, Mail } from "lucide-react"
-import { supabase } from "@/lib/supabase"
 
 interface LoginPageProps {
   onLogin: (userId: string) => void
@@ -21,22 +20,26 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     setIsLoading(true)
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       })
 
-      if (signInError) {
-        setError(signInError.message)
-        setIsLoading(false)
-        return
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Login failed')
       }
 
       if (data.user) {
         onLogin(data.user.id)
       }
     } catch (err) {
-      setError("An unexpected error occurred")
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
+    } finally {
       setIsLoading(false)
     }
   }

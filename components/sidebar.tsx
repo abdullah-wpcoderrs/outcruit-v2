@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronLeft, ChevronRight, FileText, Users, Zap, X, LogOut } from "lucide-react"
+import { ChevronLeft, ChevronRight, LayoutDashboard, History, User, Settings, X, LogOut } from "lucide-react"
 
 interface SidebarProps {
   activeNav: string
@@ -22,9 +22,10 @@ export default function Sidebar({
   onLogout,
 }: SidebarProps) {
   const navItems = [
-    { id: "jd-tracker", label: "JD Tracker", icon: FileText },
-    { id: "talent-sorting", label: "Talent Sorting", icon: Users },
-    { id: "create-job-ads", label: "Create Job Ads", icon: Zap },
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "history", label: "History", icon: History },
+    { id: "profile", label: "Profile", icon: User },
+    { id: "settings", label: "Settings", icon: Settings },
   ]
 
   const handleNavClick = (id: string) => {
@@ -36,14 +37,12 @@ export default function Sidebar({
     <>
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden sm:flex flex-col border-r border-border bg-primary transition-all duration-300 overflow-hidden ${
-          isOpen ? "w-56" : "w-16"
-        }`}
+        className={`hidden sm:flex flex-col border-r border-border bg-primary transition-all duration-300 overflow-hidden ${isOpen ? "w-56" : "w-16"
+          }`}
       >
         {/* Toggle Button */}
-        <div className={`flex items-center border-b border-primary-foreground/10 p-4 ${
-          isOpen ? "justify-between" : "justify-center"
-        }`}>
+        <div className={`flex items-center border-b border-primary-foreground/10 p-4 ${isOpen ? "justify-between" : "justify-center"
+          }`}>
           {isOpen && (
             <span className="text-sm font-semibold text-primary-foreground whitespace-nowrap transition-opacity duration-300">
               Menu
@@ -68,19 +67,16 @@ export default function Sidebar({
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`w-full flex items-center rounded-lg py-3 text-sm font-medium transition-all ${
-                  isOpen ? "justify-start gap-3 px-4" : "justify-center px-2"
-                } ${
-                  isActive
+                className={`w-full flex items-center rounded-lg py-3 text-sm font-medium transition-all ${isOpen ? "justify-start gap-3 px-4" : "justify-center px-2"
+                  } ${isActive
                     ? "bg-accent text-accent-foreground shadow-sm"
                     : "text-primary-foreground hover:bg-primary-foreground/10"
-                }`}
+                  }`}
               >
                 <Icon className="flex-shrink-0 h-5 w-5 transition-all" />
-                <span 
-                  className={`whitespace-nowrap transition-all duration-300 ${
-                    isOpen ? "opacity-100 w-auto ml-0" : "opacity-0 w-0 ml-0 overflow-hidden"
-                  }`}
+                <span
+                  className={`whitespace-nowrap transition-all duration-300 ${isOpen ? "opacity-100 w-auto ml-0" : "opacity-0 w-0 ml-0 overflow-hidden"
+                    }`}
                 >
                   {item.label}
                 </span>
@@ -95,9 +91,8 @@ export default function Sidebar({
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed left-0 top-0 bottom-0 z-40 w-56 border-r border-border bg-primary transition-transform duration-300 sm:hidden ${
-          isMobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed left-0 top-0 bottom-0 z-40 w-56 border-r border-border bg-primary transition-transform duration-300 sm:hidden ${isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex flex-col h-full">
           {/* Header with close button */}
@@ -121,11 +116,10 @@ export default function Sidebar({
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
-                  className={`w-full flex items-center justify-start gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
-                    isActive
+                  className={`w-full flex items-center justify-start gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${isActive
                       ? "bg-accent text-accent-foreground shadow-sm"
                       : "text-primary-foreground hover:bg-primary-foreground/10"
-                  }`}
+                    }`}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
                   <span>{item.label}</span>

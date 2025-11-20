@@ -1,17 +1,17 @@
 "use client"
 
 import { Bell, Check, CheckCheck, RefreshCw, Trash2, X } from "lucide-react"
-import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications"
+import { useNotifications } from "@/hooks/use-notifications"
 import { formatDistanceToNow } from "date-fns"
 
 interface NotificationPanelProps {
   isOpen: boolean
   onClose: () => void
-  notificationHook?: ReturnType<typeof useRealtimeNotifications>
+  notificationHook?: ReturnType<typeof useNotifications>
 }
 
 export default function NotificationPanel({ isOpen, onClose, notificationHook }: NotificationPanelProps) {
-  const hookData = notificationHook || useRealtimeNotifications()
+  const hookData = notificationHook || useNotifications()
   const { notifications, unreadCount, isLoading, isRefreshing, markAsRead, markAllAsRead, deleteNotification, clearAll, refreshNotifications } = hookData
 
   if (!isOpen) return null
@@ -110,9 +110,8 @@ export default function NotificationPanel({ isOpen, onClose, notificationHook }:
                 return (
                   <div
                     key={notification.id}
-                    className={`p-4 transition-colors hover:bg-muted/50 ${
-                      isUnread ? 'bg-green-50/50 dark:bg-green-950/20' : ''
-                    }`}
+                    className={`p-4 transition-colors hover:bg-muted/50 ${isUnread ? 'bg-green-50/50 dark:bg-green-950/20' : ''
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="text-2xl flex-shrink-0 mt-0.5">
