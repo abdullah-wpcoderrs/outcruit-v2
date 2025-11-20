@@ -14,8 +14,8 @@ export function JobAdCard({ jobTitle, fileId, createdAt }: JobAdCardProps) {
     return (
         <Card className="flex flex-col h-full">
             <CardHeader className="flex-row gap-4 items-center space-y-0 pb-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                    <FileText className="h-6 w-6 text-primary" />
+                <div className="p-2 bg-red-100 rounded-lg dark:bg-red-900/20">
+                    <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
                 <CardTitle className="text-base font-medium line-clamp-1" title={jobTitle}>
                     {jobTitle}
