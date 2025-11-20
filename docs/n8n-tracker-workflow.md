@@ -192,7 +192,7 @@ Switch (Check type)
 - Check terminal logs for webhook errors
 
 **Google Sheets not updating?**
-- Verify the Lookup Column name matches your sheet exactly
+- Verify the row number matches your sheet
 - Check Google Sheets permissions
 - View n8n execution details for errors
 
@@ -202,20 +202,79 @@ Switch (Check type)
 
 ---
 
-## Optional Enhancements
+## Optional Enhancement: Email Notifications
 
-### Add Email Notifications
+Send email alerts when tracker statuses change.
 
-After Google Sheets node, add **"Gmail"** or **"Send Email"** node to notify when status changes.
+### Setup Email Node
 
-### Add Logging
+1. **After Google Sheets node**, add one of these email nodes:
+   - **Gmail** (if using Google Workspace)
+   - **Send Email** (SMTP)
+   - **Outlook** (if using Microsoft)
 
-Add **"HTTP Request"** node to log updates to your own API or database.
+2. **Configure Email Node:**
+   - **To**: `={{ $json.recruiter_email }}` (or your admin email)
+   - **Subject**: `JD Tracker Status Update - {{ $json.brief_name }}`
+   - **Email Type**: `Text` or `HTML`
 
-### Add Slack Notifications
+3. **Email Body Template (Text):**
+```
+Hello,
 
-Add **"Slack"** node to post status changes to a channel.
+The status for the following tracker has been updated:
+
+Brief Name: {{ $json.brief_name }}
+Role: {{ $json.role_name }}
+New Status: {{ $json.status }}
+Recruiter: {{ $json.recruiter_email }}
+
+View the sheet: https://docs.google.com/spreadsheets/d/{{ $json.application_sheet_id }}
+
+Best regards,
+Outcruit JD Tracker
+```
+
+4. **Email Body Template (HTML):**
+```html
+<h2>JD Tracker Status Update</h2>
+<p>The status for the following tracker has been updated:</p>
+<table style="border-collapse: collapse;">
+  <tr>
+    <td style="padding: 8px; font-weight: bold;">Brief Name:</td>
+    <td style="padding: 8px;">{{ $json.brief_name }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; font-weight: bold;">Role:</td>
+    <td style="padding: 8px;">{{ $json.role_name }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; font-weight: bold;">New Status:</td>
+    <td style="padding: 8px;"><strong>{{ $json.status }}</strong></td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; font-weight: bold;">Recruiter:</td>
+    <td style="padding: 8px;">{{ $json.recruiter_email }}</td>
+  </tr>
+</table>
+<p><a href="https://docs.google.com/spreadsheets/d/{{ $json.application_sheet_id }}">View Google Sheet</a></p>
+```
+
+### For Bulk Updates
+
+If you want emails for bulk updates, add the email node after the **Split In Batches** node so each update gets an email.
+
+Alternatively, send one summary email:
+- Skip Split In Batches
+- Send email with list of all changes
+- Use: `{{ $json.updates.length }} trackers updated`
+
+### Testing
+
+1. Change a tracker status
+2. Check Google Sheets (should update)
+3. Check email inbox (should receive notification)
 
 ---
 
-That's it! Your tracker status updates will now automatically sync to Google Sheets! 🎉
+That's it! Your tracker status updates will now automatically sync to Google Sheets and send email notifications! 🎉

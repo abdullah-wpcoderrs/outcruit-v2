@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
         const client = await pool.connect();
         try {
             // Find user by email
-            const userResult = await client.query('SELECT id FROM public.users WHERE email = $1', [recruiterEmail]);
+            const normalizedEmail = String(recruiterEmail).trim();
+            const userResult = await client.query('SELECT id FROM public.users WHERE LOWER(email) = LOWER($1)', [normalizedEmail]);
             const userId = userResult.rows[0]?.id;
 
             // Insert into talent_lists
