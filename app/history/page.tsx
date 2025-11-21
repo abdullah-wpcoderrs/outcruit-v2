@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { JobAdCard } from "@/components/dashboard/job-ad-card"
 import { TalentListCard } from "@/components/dashboard/talent-list-card"
 import { TrackerTable } from "@/components/history/tracker-table"
+import { TalentSortingTable } from "@/components/history/talent-sorting-table"
+import { CsvPreview } from "@/components/history/csv-preview"
 import AuthenticatedLayout from "@/components/authenticated-layout"
 import { Button } from "@/components/ui/button"
 
@@ -41,6 +43,7 @@ export default function HistoryPage() {
     const [trackerData, setTrackerData] = useState<TrackerItem[]>([])
     const [loading, setLoading] = useState(true)
     const [preview, setPreview] = useState<{ fileId: string; title: string } | null>(null)
+    const [talentView, setTalentView] = useState<'documents' | 'table'>('table')
     const [deletingAds, setDeletingAds] = useState<Set<string>>(new Set())
     const [deletingTalent, setDeletingTalent] = useState<Set<string>>(new Set())
 
@@ -75,12 +78,12 @@ export default function HistoryPage() {
     }
 
     const openNewTab = (fileId: string) => {
-        window.open(`/api/files/${fileId}`, '_blank', 'noopener,noreferrer')
+        window.open(`/api/files/${fileId}?preview=1`, '_blank', 'noopener,noreferrer')
     }
 
     const downloadFile = async (fileId: string, title: string) => {
         try {
-            const res = await fetch(`/api/files/${fileId}`)
+            const res = await fetch(`/api/files/${fileId}?download=1`)
             if (!res.ok) return
             const blob = await res.blob()
             const url = URL.createObjectURL(blob)
@@ -265,11 +268,18 @@ export default function HistoryPage() {
                     </TabsContent>
 
                     <TabsContent value="talent-sorting" className="space-y-4">
+                        <div className="flex items-center justify-end gap-2">
+                            <span className="text-xs text-muted-foreground">View</span>
+                            <div className="flex rounded-md border">
+                                <button className={`px-3 py-1 text-xs ${talentView === 'documents' ? 'bg-accent text-accent-foreground' : ''}`} onClick={() => setTalentView('documents')}>Documents</button>
+                                <button className={`px-3 py-1 text-xs ${talentView === 'table' ? 'bg-accent text-accent-foreground' : ''}`} onClick={() => setTalentView('table')}>Table</button>
+                            </div>
+                        </div>
                         {talentLists.length === 0 ? (
                             <div className="text-center py-12 text-muted-foreground border rounded-lg border-dashed">
                                 No talent lists sorted yet.
                             </div>
-                        ) : (
+                        ) : talentView === 'documents' ? (
                             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 {talentLists.map((list) => (
                                     <TalentListCard
@@ -287,6 +297,8 @@ export default function HistoryPage() {
                                     />
                                 ))}
                             </div>
+                        ) : (
+                            <TalentSortingTable />
                         )}
                     </TabsContent>
 
@@ -303,7 +315,7 @@ export default function HistoryPage() {
                 {preview && (
                     <div className="fixed inset-0 z-50">
                         <div className="absolute inset-0 bg-black/50" onClick={closePreview} />
-                        <div className="absolute right-0 top-0 h-full w-full max-w-2xl bg-background shadow-xl flex flex-col">
+                        <div className="absolute right-0 top-0 h-full w-full max-w-5xl bg-background shadow-xl flex flex-col">
                             <div className="p-4 border-b flex items-center justify-between">
                                 <div className="font-semibold text-base line-clamp-1">{preview.title}</div>
                                 <div className="flex gap-2">
@@ -313,7 +325,7 @@ export default function HistoryPage() {
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <iframe src={`/api/files/${preview.fileId}`} className="w-full h-full" title={preview.title} />
+                                <CsvPreview fileId={preview.fileId} />
                             </div>
                         </div>
                     </div>

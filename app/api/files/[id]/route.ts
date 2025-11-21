@@ -23,13 +23,27 @@ export async function GET(
         }
 
         const file = result.rows[0];
-        const buffer = file.data; // This should be a Buffer
+        const buffer = file.data;
 
-        // Create a response with the file data
+        const url = new URL(request.url);
+        const isPreview = url.searchParams.get('preview') === '1';
+        const isDownload = url.searchParams.get('download') === '1';
+
+        let contentType = file.mime_type || 'application/octet-stream';
+        if (isPreview) {
+            if (contentType.includes('csv')) {
+                contentType = 'text/plain; charset=utf-8';
+            } else if (contentType === 'application/octet-stream') {
+                contentType = 'text/plain; charset=utf-8';
+            }
+        }
+
+        const disposition = isDownload ? 'attachment' : 'inline';
+
         return new NextResponse(buffer, {
             headers: {
-                'Content-Type': file.mime_type,
-                'Content-Disposition': `inline; filename="${file.filename}"`,
+                'Content-Type': contentType,
+                'Content-Disposition': `${disposition}; filename="${file.filename}"`,
             },
         });
     } catch (error) {

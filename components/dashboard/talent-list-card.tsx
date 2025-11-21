@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FileText, Users, Calendar, MoreVertical } from 'lucide-react';
+import { FileSpreadsheet, Users, Calendar, MoreVertical } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
@@ -42,8 +42,8 @@ export function TalentListCard({ id, jobTitle, fileId, candidateCount, createdAt
     return (
         <Card className="flex flex-col h-full relative">
             <CardHeader className="flex-row gap-4 items-center space-y-0 pb-2">
-                <div className="p-2 bg-red-100 rounded-lg dark:bg-red-900/20">
-                    <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
+                <div className="p-2 bg-green-100 rounded-lg dark:bg-green-900/20">
+                    <FileSpreadsheet className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="flex-1 flex items-center">
                     <CardTitle className="text-base font-medium line-clamp-1" title={jobTitle}>
