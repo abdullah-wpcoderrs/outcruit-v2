@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { verifyToken } from '@/lib/auth';
 
 export async function GET(
     request: NextRequest,
@@ -51,5 +52,48 @@ export async function GET(
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     } finally {
         client.release();
+    }
+}
+
+export async function PATCH(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const token = request.cookies.get('auth_token')?.value;
+        if (!token) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const payload = await verifyToken(token);
+        if (!payload) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { id } = await params;
+        const body = await request.json();
+        const requestedName: string = String(body.filename || body.name || '').trim();
+        if (!requestedName) {
+            return NextResponse.json({ error: 'filename is required' }, { status: 400 });
+        }
+
+        const client = await pool.connect();
+        try {
+            const res = await client.query('SELECT filename FROM public.files WHERE id = $1', [id]);
+            if (res.rows.length === 0) {
+                return NextResponse.json({ error: 'File not found' }, { status: 404 });
+            }
+            const current = res.rows[0].filename as string;
+            const dot = current.lastIndexOf('.');
+            const ext = dot >= 0 ? current.substring(dot) : '';
+            const newFilename = requestedName.endsWith(ext) || !ext ? requestedName : `${requestedName}${ext}`;
+
+            await client.query('UPDATE public.files SET filename = $1 WHERE id = $2', [newFilename, id]);
+            return NextResponse.json({ success: true, filename: newFilename });
+        } finally {
+            client.release();
+        }
+    } catch (error) {
+        console.error('Error renaming file:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

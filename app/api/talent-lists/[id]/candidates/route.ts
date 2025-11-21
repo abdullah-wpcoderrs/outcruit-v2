@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { pool } from '@/lib/db'
 import { verifyToken } from '@/lib/auth'
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params
         const token = request.cookies.get('auth_token')?.value
         if (!token) return NextResponse.json({ items: [], page: 1, pageSize: 20, total: 0 }, { status: 200 })
         const payload = await verifyToken(token)
@@ -20,11 +21,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
         const client = await pool.connect()
         try {
-            const listResult = await client.query('SELECT id FROM public.talent_lists WHERE id = $1 AND user_id = $2', [params.id, userId])
+            const listResult = await client.query('SELECT id FROM public.talent_lists WHERE id = $1 AND user_id = $2', [id, userId])
             if (listResult.rows.length === 0) return NextResponse.json({ items: [], page, pageSize, total: 0 }, { status: 200 })
 
             const filters: string[] = ['talent_list_id = $1', 'user_id = $2']
-            const values: any[] = [params.id, userId]
+            const values: any[] = [id, userId]
             let idx = values.length
 
             if (q) {
