@@ -18,7 +18,8 @@ export default function AuthenticatedLayout({ children }: AuthenticatedLayoutPro
     // Determine active nav based on pathname
     const activeNav = pathname.includes("/history") ? "history" :
         pathname.includes("/profile") ? "profile" :
-            pathname.includes("/settings") ? "settings" : "dashboard"
+            pathname.includes("/settings") ? "settings" :
+                pathname.includes("/candidates") ? "candidates" : "dashboard"
 
     const handleLogout = async () => {
         try {
