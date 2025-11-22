@@ -19,64 +19,59 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         const role = url.searchParams.get('role') || ''
         const status = url.searchParams.get('status') || ''
 
-        const client = await pool.connect()
-        try {
-            // Ensure table exists to avoid 500 errors on fresh databases
-            const tableExists = await client.query("SELECT to_regclass('public.talent_list_candidates') AS t")
-            if (!tableExists.rows[0]?.t) {
-                return NextResponse.json({ items: [], page, pageSize, total: 0 }, { status: 200 })
-            }
-            const listResult = await client.query('SELECT id FROM public.talent_lists WHERE id = $1 AND user_id = $2', [id, userId])
-            if (listResult.rows.length === 0) return NextResponse.json({ items: [], page, pageSize, total: 0 }, { status: 200 })
-
-            const filters: string[] = ['talent_list_id = $1', 'user_id = $2']
-            const values: any[] = [id, userId]
-            let idx = values.length
-
-            if (q) {
-                idx += 1
-                filters.push(`(name ILIKE $${idx} OR email ILIKE $${idx} OR phone_number ILIKE $${idx} OR role_applying_for ILIKE $${idx} OR residential_address ILIKE $${idx})`)
-                values.push(`%${q}%`)
-            }
-            if (gender) {
-                idx += 1
-                filters.push(`gender ILIKE $${idx}`)
-                values.push(gender)
-            }
-            if (role) {
-                idx += 1
-                filters.push(`role_applying_for ILIKE $${idx}`)
-                values.push(`%${role}%`)
-            }
-            if (status) {
-                idx += 1
-                filters.push(`status ILIKE $${idx}`)
-                values.push(status)
-            }
-
-            const where = filters.length ? `WHERE ${filters.join(' AND ')}` : ''
-            const countResult = await client.query(`SELECT COUNT(*)::int AS count FROM public.talent_list_candidates ${where}`, values)
-            const total = countResult.rows[0]?.count || 0
-
-            idx += 1
-            const limitParam = idx
-            values.push(pageSize)
-            idx += 1
-            const offsetParam = idx
-            values.push((page - 1) * pageSize)
-
-            const dataResult = await client.query(
-                `SELECT id, row_no, name, email, phone_number, academic_qualification, residential_address, gender, role_applying_for, application_sheet_id, status, interview_date, interview_time_slot, meeting_venue_url, recruiter_name, recruiter_email
-                 FROM public.talent_list_candidates ${where}
-                 ORDER BY COALESCE(row_no, 0) ASC, created_at ASC
-                 LIMIT $${limitParam} OFFSET $${offsetParam}`,
-                values
-            )
-
-            return NextResponse.json({ items: dataResult.rows, page, pageSize, total })
-        } finally {
-            client.release()
+        // Ensure table exists to avoid 500 errors on fresh databases
+        const tableExists = await pool.query("SELECT to_regclass('public.talent_list_candidates') AS t")
+        if (!tableExists.rows[0]?.t) {
+            return NextResponse.json({ items: [], page, pageSize, total: 0 }, { status: 200 })
         }
+        const listResult = await pool.query('SELECT id FROM public.talent_lists WHERE id = $1 AND user_id = $2', [id, userId])
+        if (listResult.rows.length === 0) return NextResponse.json({ items: [], page, pageSize, total: 0 }, { status: 200 })
+
+        const filters: string[] = ['talent_list_id = $1', 'user_id = $2']
+        const values: any[] = [id, userId]
+        let idx = values.length
+
+        if (q) {
+            idx += 1
+            filters.push(`(name ILIKE $${idx} OR email ILIKE $${idx} OR phone_number ILIKE $${idx} OR role_applying_for ILIKE $${idx} OR residential_address ILIKE $${idx})`)
+            values.push(`%${q}%`)
+        }
+        if (gender) {
+            idx += 1
+            filters.push(`gender ILIKE $${idx}`)
+            values.push(gender)
+        }
+        if (role) {
+            idx += 1
+            filters.push(`role_applying_for ILIKE $${idx}`)
+            values.push(`%${role}%`)
+        }
+        if (status) {
+            idx += 1
+            filters.push(`status ILIKE $${idx}`)
+            values.push(status)
+        }
+
+        const where = filters.length ? `WHERE ${filters.join(' AND ')}` : ''
+        const countResult = await pool.query(`SELECT COUNT(*)::int AS count FROM public.talent_list_candidates ${where}`, values)
+        const total = countResult.rows[0]?.count || 0
+
+        idx += 1
+        const limitParam = idx
+        values.push(pageSize)
+        idx += 1
+        const offsetParam = idx
+        values.push((page - 1) * pageSize)
+
+        const dataResult = await pool.query(
+            `SELECT id, row_no, name, email, phone_number, academic_qualification, residential_address, gender, role_applying_for, application_sheet_id, status, interview_date, interview_time_slot, meeting_venue_url, recruiter_name, recruiter_email
+             FROM public.talent_list_candidates ${where}
+             ORDER BY COALESCE(row_no, 0) ASC, created_at ASC
+             LIMIT $${limitParam} OFFSET $${offsetParam}`,
+            values
+        )
+
+        return NextResponse.json({ items: dataResult.rows, page, pageSize, total })
     } catch (e) {
         console.error('[TalentListCandidates]', e)
         return NextResponse.json({ items: [], page: 1, pageSize: 20, total: 0 }, { status: 200 })
@@ -123,8 +118,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
             else if (typeof singleId === 'string' && singleId) targetIds = [singleId]
             else return NextResponse.json({ error: 'ids or id required' }, { status: 400 })
 
-            const placeholders = targetIds.map((_, i) => `$${idx + i}`).join(', ')
-            const query = `UPDATE public.talent_list_candidates SET ${fields.join(', ')} WHERE talent_list_id = $${idx + targetIds.length + 1} AND id IN (${placeholders}) AND user_id = $${idx + targetIds.length + 2}`
+            const idStart = idx
+            const idPlaceholders = targetIds.map((_, i) => `$${idStart + i}`).join(', ')
+            const tlParam = idStart + targetIds.length
+            const userParam = tlParam + 1
+            const query = `UPDATE public.talent_list_candidates SET ${fields.join(', ')} WHERE talent_list_id = $${tlParam} AND id IN (${idPlaceholders}) AND user_id = $${userParam}`
 
             await client.query(query, [...values, ...targetIds, id, userId])
             return NextResponse.json({ success: true, updated: targetIds.length })

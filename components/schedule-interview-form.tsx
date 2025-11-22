@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import {
     Form,
     FormControl,
@@ -33,6 +34,8 @@ interface ScheduleInterviewFormProps {
 
 export function ScheduleInterviewForm({ talentListId, jobName }: ScheduleInterviewFormProps) {
     const [isLoading, setIsLoading] = useState(false)
+    const [successOpen, setSuccessOpen] = useState(false)
+    const [lastCount, setLastCount] = useState(0)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -69,6 +72,8 @@ export function ScheduleInterviewForm({ talentListId, jobName }: ScheduleIntervi
 
             const candidateCount = data.count || data.candidateCount || 0
             toast.success(`Interview schedule created for ${jobName}. ${candidateCount} candidates assigned time slots.`)
+            setLastCount(candidateCount)
+            setSuccessOpen(true)
             try { window.dispatchEvent(new CustomEvent('schedule:completed')); } catch {}
             form.reset()
         } catch (error) {
@@ -173,6 +178,19 @@ export function ScheduleInterviewForm({ talentListId, jobName }: ScheduleIntervi
                     Schedule Interviews
                 </Button>
             </form>
+            <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
+                <DialogContent className="sm:max-w-[420px]">
+                    <DialogHeader>
+                        <DialogTitle>Interview Schedule Created</DialogTitle>
+                    </DialogHeader>
+                    <div className="text-sm">
+                        Implemented schedule for {jobName}. {lastCount} candidates assigned time slots.
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={() => setSuccessOpen(false)} variant="default">OK</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </Form>
     )
 }

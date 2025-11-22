@@ -137,11 +137,18 @@ export function CandidateTable({ jobTrackerId, talentListId, overrideCandidates,
 
     const changeStatus = async (id: string, status: string) => {
         if (!talentListId) return
-        await fetch(`/api/talent-lists/${talentListId}/candidates`, {
-            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, updates: { status } })
-        })
-        fetchCandidates()
+        // Optimistic update
+        setCandidates(prev => prev.map(c => c.id === id ? { ...c, status } : c))
+        try {
+            const res = await fetch(`/api/talent-lists/${talentListId}/candidates`, {
+                method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, updates: { status } })
+            })
+            if (!res.ok) throw new Error('Failed to update status')
+        } catch (e) {
+            // Re-fetch on failure to restore server truth
+            fetchCandidates()
+        }
     }
 
     const scheduledCount = candidates.filter(c => c.status === 'Scheduled').length
@@ -215,7 +222,7 @@ export function CandidateTable({ jobTrackerId, talentListId, overrideCandidates,
                                     <TableCell>{candidate.email}</TableCell>
                                     <TableCell>
                                         <Select value={candidate.status} onValueChange={(v) => changeStatus(candidate.id, v)}>
-                                            <SelectTrigger className="w-[180px]">
+                                            <SelectTrigger className={`w-[180px] ${getStatusColor(candidate.status)}`}>
                                                 <SelectValue placeholder="Status" />
                                             </SelectTrigger>
                                             <SelectContent>
