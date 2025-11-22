@@ -21,6 +21,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
         const client = await pool.connect()
         try {
+            // Ensure table exists to avoid 500 errors on fresh databases
+            const tableExists = await client.query("SELECT to_regclass('public.talent_list_candidates') AS t")
+            if (!tableExists.rows[0]?.t) {
+                return NextResponse.json({ items: [], page, pageSize, total: 0 }, { status: 200 })
+            }
             const listResult = await client.query('SELECT id FROM public.talent_lists WHERE id = $1 AND user_id = $2', [id, userId])
             if (listResult.rows.length === 0) return NextResponse.json({ items: [], page, pageSize, total: 0 }, { status: 200 })
 
@@ -73,7 +78,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             client.release()
         }
     } catch (e) {
-        return NextResponse.json({ items: [], page: 1, pageSize: 20, total: 0 }, { status: 500 })
+        console.error('[TalentListCandidates]', e)
+        return NextResponse.json({ items: [], page: 1, pageSize: 20, total: 0 }, { status: 200 })
     }
 }
 
