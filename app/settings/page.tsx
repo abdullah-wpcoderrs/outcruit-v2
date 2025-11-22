@@ -9,8 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Bell, Palette, Shield, User, Mail, Lock, Trash2, Save } from "lucide-react"
+import { Bell, Palette, Shield, Lock, Save } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface Preferences {
@@ -137,7 +136,7 @@ export default function SettingsPage() {
 
                 {/* Settings Tabs */}
                 <Tabs defaultValue="notifications" className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="notifications" className="gap-2">
                             <Bell className="h-4 w-4" />
                             <span className="hidden sm:inline">Notifications</span>
@@ -145,10 +144,6 @@ export default function SettingsPage() {
                         <TabsTrigger value="appearance" className="gap-2">
                             <Palette className="h-4 w-4" />
                             <span className="hidden sm:inline">Appearance</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="account" className="gap-2">
-                            <User className="h-4 w-4" />
-                            <span className="hidden sm:inline">Account</span>
                         </TabsTrigger>
                         <TabsTrigger value="security" className="gap-2">
                             <Shield className="h-4 w-4" />
@@ -312,77 +307,6 @@ export default function SettingsPage() {
                         </Card>
                     </TabsContent>
 
-                    {/* Account Tab */}
-                    <TabsContent value="account" className="space-y-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Account Settings</CardTitle>
-                                <CardDescription>
-                                    Manage your account details
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="account-email">Email Address</Label>
-                                        <Input
-                                            id="account-email"
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="your.email@company.com"
-                                        />
-                                        <p className="text-sm text-muted-foreground">
-                                            Update your email address (requires verification)
-                                        </p>
-                                    </div>
-                                    <Button variant="outline" disabled className="gap-2">
-                                        <Mail className="h-4 w-4" />
-                                        Update Email
-                                    </Button>
-                                </div>
-
-                                <div className="border-t pt-6">
-                                    <h3 className="text-lg font-semibold mb-4">Danger Zone</h3>
-                                    <Card className="border-destructive">
-                                        <CardHeader>
-                                            <CardTitle className="text-base">Delete Account</CardTitle>
-                                            <CardDescription>
-                                                Permanently delete your account and all associated data
-                                            </CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                                                <DialogTrigger asChild>
-                                                    <Button variant="destructive" className="gap-2">
-                                                        <Trash2 className="h-4 w-4" />
-                                                        Delete Account
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>Are you absolutely sure?</DialogTitle>
-                                                        <DialogDescription>
-                                                            This action cannot be undone. This will permanently delete your
-                                                            account and remove all your data from our servers.
-                                                        </DialogDescription>
-                                                    </DialogHeader>
-                                                    <DialogFooter>
-                                                        <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-                                                            Cancel
-                                                        </Button>
-                                                        <Button variant="destructive" onClick={() => setDeleteDialogOpen(false)}>
-                                                            Delete Account
-                                                        </Button>
-                                                    </DialogFooter>
-                                                </DialogContent>
-                                            </Dialog>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
 
                     {/* Security Tab */}
                     <TabsContent value="security" className="space-y-4">
