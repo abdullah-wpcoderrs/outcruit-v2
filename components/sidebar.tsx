@@ -22,8 +22,8 @@ export default function Sidebar({
   onLogout,
 }: SidebarProps) {
   const navItems = [
-    { id: "candidates", label: "Schedule", icon: Calendar },
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "candidates", label: "Schedule", icon: Calendar },
     { id: "history", label: "History", icon: History },
     { id: "profile", label: "Profile", icon: User },
     { id: "settings", label: "Settings", icon: Settings },
