@@ -22,10 +22,11 @@ function DashboardContent() {
                 <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
 
                 <Tabs defaultValue={defaultTab} className="space-y-6">
+                    {/* Reordered tabs: JD Tracker, Create Job Ads, Talent Sorting */}
                     <TabsList className="grid w-full grid-cols-4">
+                        <TabsTrigger value="jd-tracker">JD Tracker</TabsTrigger>
                         <TabsTrigger value="job-ads">Create Job Ads</TabsTrigger>
                         <TabsTrigger value="talent-sorting">Talent Sorting</TabsTrigger>
-                        <TabsTrigger value="jd-tracker">JD Tracker</TabsTrigger>
                         <TabsTrigger value="candidate-communication">Candidate Communication</TabsTrigger>
                     </TabsList>
 

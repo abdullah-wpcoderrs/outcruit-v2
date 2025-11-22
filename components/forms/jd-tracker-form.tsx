@@ -16,7 +16,6 @@ export default function JDTrackerForm() {
     jobName: "",
     jdFile: null as File | null,
     additionalLogic: "",
-    recruiterName: "",
   })
   const [isLoading, setIsLoading] = useState(false)
   const [successModal, setSuccessModal] = useState(false)
@@ -26,7 +25,8 @@ export default function JDTrackerForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.jobName || !formData.jdFile || !formData.recruiterName || !user?.email) {
+    // Validate required fields; recruiter name is now derived from profile
+    if (!formData.jobName || !formData.jdFile || !user?.email) {
       setErrorMessage("Please fill in all required fields")
       setErrorModal(true)
       return
@@ -45,13 +45,19 @@ export default function JDTrackerForm() {
       const webhookUrl = process.env.NEXT_PUBLIC_JD_TRACKER_WEBHOOK || "https://example.com/webhook"
       const recruitmentType = activeTab === "outsourcing" ? "Outsourcing Recruitment" : "One-Off Recruitment"
 
+      // Derive recruiter name from user profile; fallback to email local-part if name is missing
+      const recruiterNameFromProfile = (user?.name && user.name.trim())
+        ? user.name.trim()
+        : (user?.email ? user.email.split('@')[0] : 'Recruiter')
+
       // Create FormData to send binary file
       const formDataToSend = new FormData()
       formDataToSend.append('jobName', formData.jobName)
       formDataToSend.append('jdFile', formData.jdFile)
       formDataToSend.append('jdFileName', formData.jdFile.name)
       formDataToSend.append('additionalLogic', formData.additionalLogic)
-      formDataToSend.append('recruiterName', formData.recruiterName)
+      // Recruiter name now comes from authenticated user's profile
+      formDataToSend.append('recruiterName', recruiterNameFromProfile)
       formDataToSend.append('recruiterEmail', user.email)
       formDataToSend.append('recruitment_type', recruitmentType)
 
@@ -62,7 +68,7 @@ export default function JDTrackerForm() {
 
       if (response.ok) {
         setSuccessModal(true)
-        setFormData({ jobName: "", jdFile: null, additionalLogic: "", recruiterName: "" })
+        setFormData({ jobName: "", jdFile: null, additionalLogic: "" })
       } else {
         throw new Error(`Submission failed: ${response.statusText}`)
       }
@@ -91,20 +97,7 @@ export default function JDTrackerForm() {
 
           <TabsContent value="outsourcing" className="mt-0">
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              {/* Recruiter Name */}
-              <div>
-                <label htmlFor="recruiterName" className="block text-left text-sm font-medium text-foreground mb-2">
-                  Recruiter Name <span className="text-error">*</span>
-                </label>
-                <input
-                  id="recruiterName"
-                  type="text"
-                  placeholder="Your Full Name"
-                  value={formData.recruiterName}
-                  onChange={(e) => setFormData({ ...formData, recruiterName: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-input px-3 sm:px-4 py-2 text-sm sm:text-base text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-                />
-              </div>
+              {/* Recruiter Name field removed; webhook now uses profile name */}
 
               {/* Job Name */}
               <div>

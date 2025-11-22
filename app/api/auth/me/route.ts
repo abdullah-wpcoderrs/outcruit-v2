@@ -17,7 +17,8 @@ export async function GET() {
     }
 
     try {
-        const result = await pool.query('SELECT id, email, created_at FROM users WHERE id = $1', [payload.userId]);
+        // Include user's name so forms can auto-populate recruiter information from profile
+        const result = await pool.query('SELECT id, email, name, created_at FROM users WHERE id = $1', [payload.userId]);
         const user = result.rows[0];
         return NextResponse.json({ user });
     } catch (error) {

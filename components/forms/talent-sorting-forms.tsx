@@ -11,7 +11,6 @@ import { useAuthUser } from "@/hooks/use-auth-user"
 export default function TalentSortingForms() {
   const { user } = useAuthUser()
   const [formData, setFormData] = useState({
-    recruiterName: "",
     jobName: "",
     responseSheetUrl: "",
   })
@@ -23,7 +22,8 @@ export default function TalentSortingForms() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.recruiterName || !user?.email || !formData.jobName || !formData.responseSheetUrl) {
+    // Validate required fields; recruiter name is now derived from profile
+    if (!user?.email || !formData.jobName || !formData.responseSheetUrl) {
       setErrorMessage("Please fill in all required fields")
       setErrorModal(true)
       return
@@ -34,8 +34,13 @@ export default function TalentSortingForms() {
     try {
       const webhookUrl = process.env.NEXT_PUBLIC_TALENT_SORTING_WEBHOOK || "https://example.com/webhook"
 
+      // Derive recruiter name from user profile; fallback to email local-part if name is missing
+      const recruiterNameFromProfile = (user?.name && user.name.trim())
+        ? user.name.trim()
+        : (user?.email ? user.email.split('@')[0] : 'Recruiter')
+
       const payload = {
-        recruiterName: formData.recruiterName,
+        recruiterName: recruiterNameFromProfile,
         recruiterEmail: user.email,
         jobName: formData.jobName,
         responseSheetUrl: formData.responseSheetUrl,
@@ -49,7 +54,7 @@ export default function TalentSortingForms() {
 
       if (response.ok) {
         setSuccessModal(true)
-        setFormData({ recruiterName: "", jobName: "", responseSheetUrl: "" })
+        setFormData({ jobName: "", responseSheetUrl: "" })
       } else {
         throw new Error(`Submission failed: ${response.statusText}`)
       }
@@ -69,20 +74,7 @@ export default function TalentSortingForms() {
             Submit your applicant response sheet to sort and analyze talent pool
           </p>
 
-          {/* Recruiter Name */}
-          <div>
-            <label htmlFor="recruiterName" className="block text-left text-sm font-medium text-foreground mb-2">
-              Recruiter Name <span className="text-error">*</span>
-            </label>
-            <input
-              id="recruiterName"
-              type="text"
-              placeholder="Your Full Name"
-              value={formData.recruiterName}
-              onChange={(e) => setFormData({ ...formData, recruiterName: e.target.value })}
-              className="w-full rounded-lg border border-border bg-input px-3 sm:px-4 py-2 text-sm sm:text-base text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-          </div>
+          {/* Recruiter Name field removed; webhook now uses profile name */}
 
           {/* Name Of Job */}
           <div>

@@ -13,7 +13,6 @@ export default function CreateJobAdsForm() {
   const [formData, setFormData] = useState({
     jdName: "",
     jdFile: null as File | null,
-    recruiterName: "",
   })
   const [isLoading, setIsLoading] = useState(false)
   const [successModal, setSuccessModal] = useState(false)
@@ -23,7 +22,8 @@ export default function CreateJobAdsForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.jdName || !formData.jdFile || !formData.recruiterName || !user?.email) {
+    // Validate required fields; recruiter name is now derived from profile
+    if (!formData.jdName || !formData.jdFile || !user?.email) {
       setErrorMessage("Please fill in all required fields")
       setErrorModal(true)
       return
@@ -41,12 +41,18 @@ export default function CreateJobAdsForm() {
     try {
       const webhookUrl = process.env.NEXT_PUBLIC_CREATE_JOB_ADS_WEBHOOK || "https://example.com/webhook"
 
+      // Derive recruiter name from user profile; fallback to email local-part if name is missing
+      const recruiterNameFromProfile = (user?.name && user.name.trim())
+        ? user.name.trim()
+        : (user?.email ? user.email.split('@')[0] : 'Recruiter')
+
       // Create FormData to send binary file
       const formDataToSend = new FormData()
       formDataToSend.append('jdName', formData.jdName)
       formDataToSend.append('jdFile', formData.jdFile)
       formDataToSend.append('jdFileName', formData.jdFile.name)
-      formDataToSend.append('recruiterName', formData.recruiterName)
+      // Recruiter name now comes from authenticated user's profile
+      formDataToSend.append('recruiterName', recruiterNameFromProfile)
       formDataToSend.append('recruiterEmail', user.email)
 
       const response = await fetch(webhookUrl, {
@@ -56,7 +62,7 @@ export default function CreateJobAdsForm() {
 
       if (response.ok) {
         setSuccessModal(true)
-        setFormData({ jdName: "", jdFile: null, recruiterName: "" })
+        setFormData({ jdName: "", jdFile: null })
       } else {
         throw new Error(`Submission failed: ${response.statusText}`)
       }
@@ -72,20 +78,7 @@ export default function CreateJobAdsForm() {
     <>
       <FormCard title="Get your Job Adcopy">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-          {/* Recruiter Name */}
-          <div>
-            <label htmlFor="recruiterName" className="block text-left text-sm font-medium text-foreground mb-2">
-              Recruiter Name <span className="text-error">*</span>
-            </label>
-            <input
-              id="recruiterName"
-              type="text"
-              placeholder="Your Full Name"
-              value={formData.recruiterName}
-              onChange={(e) => setFormData({ ...formData, recruiterName: e.target.value })}
-              className="w-full rounded-lg border border-border bg-input px-3 sm:px-4 py-2 text-sm sm:text-base text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-          </div>
+          {/* Recruiter Name field removed; webhook now uses profile name */}
 
           {/* JD Name */}
           <div>
