@@ -7,16 +7,18 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const {
+            talentListId,
             jobTrackerId,
             emailType,
             jobName
         }: {
-            jobTrackerId: string;
+            talentListId?: string;
+            jobTrackerId?: string;
             emailType: 'interview_schedule' | 'congratulatory' | 'rejection';
             jobName: string;
         } = body;
 
-        if (!jobTrackerId || !emailType || !jobName) {
+        if ((!talentListId && !jobTrackerId) || !emailType || !jobName) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
@@ -45,10 +47,15 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Fetch candidates
-        const fetchResult = await pool.query(
-            'SELECT * FROM candidates WHERE job_tracker_id = $1 AND status = $2',
-            [jobTrackerId, targetStatus]
-        );
+        const fetchResult = talentListId
+            ? await pool.query(
+                'SELECT * FROM talent_list_candidates WHERE talent_list_id = $1 AND status = $2',
+                [talentListId, targetStatus]
+            )
+            : await pool.query(
+                'SELECT * FROM candidates WHERE job_tracker_id = $1 AND status = $2',
+                [jobTrackerId, targetStatus]
+            );
         const candidates = fetchResult.rows;
 
         if (!candidates || candidates.length === 0) {
@@ -94,10 +101,11 @@ export async function POST(request: NextRequest) {
 
                 // Update candidate status if needed
                 if (nextStatus !== targetStatus) {
-                    await client.query(
-                        'UPDATE candidates SET status = $1 WHERE id = $2',
-                        [nextStatus, candidate.id]
-                    );
+                    if (talentListId) {
+                        await client.query('UPDATE talent_list_candidates SET status = $1 WHERE id = $2', [nextStatus, candidate.id]);
+                    } else {
+                        await client.query('UPDATE candidates SET status = $1 WHERE id = $2', [nextStatus, candidate.id]);
+                    }
                 }
 
                 await client.query('COMMIT');

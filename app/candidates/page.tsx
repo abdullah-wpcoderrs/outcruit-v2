@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import AuthenticatedLayout from "@/components/authenticated-layout"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,15 +11,30 @@ import { ScheduleInterviewForm } from "@/components/schedule-interview-form"
 import { SendEmailForm } from "@/components/send-email-form"
 
 export default function CandidatesPage() {
-    const [jobTrackers, setJobTrackers] = useState<{ id: string, name: string }[]>([])
-    const [selectedJobTrackerId, setSelectedJobTrackerId] = useState<string>("")
+    const searchParams = useSearchParams()
+    const [talentLists, setTalentLists] = useState<{ id: string, name: string }[]>([])
+    const [selectedTalentListId, setSelectedTalentListId] = useState<string>("")
     const [selectedJobName, setSelectedJobName] = useState<string>("")
 
     const handleJobChange = (id: string) => {
-        setSelectedJobTrackerId(id)
-        const t = jobTrackers.find(t => t.id === id)
+        setSelectedTalentListId(id)
+        const t = talentLists.find(t => t.id === id)
         setSelectedJobName(t?.name || "")
     }
+
+    useEffect(() => {
+        const run = async () => {
+            try {
+                const res = await fetch('/api/talent-lists')
+                const data = await res.json()
+                if (Array.isArray(data)) {
+                    const mapped = data.map((d: any) => ({ id: d.id, name: d.job_title || d.file_name || 'Untitled' }))
+                    setTalentLists(mapped)
+                }
+            } catch {}
+        }
+        run()
+    }, [])
 
     return (
         <AuthenticatedLayout>
@@ -31,14 +47,14 @@ export default function CandidatesPage() {
                         </p>
                     </div>
                     <div className="w-full sm:w-[300px]">
-                        <Select value={selectedJobTrackerId} onValueChange={handleJobChange}>
+                        <Select value={selectedTalentListId} onValueChange={handleJobChange}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select a Job" />
                             </SelectTrigger>
                             <SelectContent>
-                                {jobTrackers.map((tracker) => (
-                                    <SelectItem key={tracker.id} value={tracker.id}>
-                                        {tracker.name}
+                                {talentLists.map((list) => (
+                                    <SelectItem key={list.id} value={list.id}>
+                                        {list.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -46,7 +62,7 @@ export default function CandidatesPage() {
                     </div>
                 </div>
 
-                {selectedJobTrackerId ? (
+                {selectedTalentListId ? (
                     <Tabs defaultValue="candidates" className="space-y-6">
                         <TabsList>
                             <TabsTrigger value="candidates">All Candidates</TabsTrigger>
@@ -63,7 +79,7 @@ export default function CandidatesPage() {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <CandidateTable jobTrackerId={selectedJobTrackerId} />
+                                    <CandidateTable talentListId={selectedTalentListId} jobName={selectedJobName} />
                                 </CardContent>
                             </Card>
                         </TabsContent>
@@ -78,7 +94,7 @@ export default function CandidatesPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <ScheduleInterviewForm
-                                        jobTrackerId={selectedJobTrackerId}
+                                        talentListId={selectedTalentListId}
                                         jobName={selectedJobName}
                                     />
                                 </CardContent>
@@ -95,7 +111,7 @@ export default function CandidatesPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <SendEmailForm
-                                        jobTrackerId={selectedJobTrackerId}
+                                        talentListId={selectedTalentListId}
                                         jobName={selectedJobName}
                                     />
                                 </CardContent>

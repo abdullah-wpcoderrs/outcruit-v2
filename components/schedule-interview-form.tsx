@@ -27,11 +27,11 @@ const formSchema = z.object({
 })
 
 interface ScheduleInterviewFormProps {
-    jobTrackerId: string
+    talentListId: string
     jobName: string
 }
 
-export function ScheduleInterviewForm({ jobTrackerId, jobName }: ScheduleInterviewFormProps) {
+export function ScheduleInterviewForm({ talentListId, jobName }: ScheduleInterviewFormProps) {
     const [isLoading, setIsLoading] = useState(false)
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -52,7 +52,7 @@ export function ScheduleInterviewForm({ jobTrackerId, jobName }: ScheduleIntervi
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    jobTrackerId,
+                    talentListId,
                     config: {
                         ...values,
                         recruiterName: "Recruiter", // TODO: Get from user profile
@@ -67,7 +67,9 @@ export function ScheduleInterviewForm({ jobTrackerId, jobName }: ScheduleIntervi
                 throw new Error(data.error || "Failed to schedule interviews")
             }
 
-            toast.success(`Successfully scheduled ${data.count} candidates`)
+            const candidateCount = data.count || data.candidateCount || 0
+            toast.success(`Interview schedule created for ${jobName}. ${candidateCount} candidates assigned time slots.`)
+            try { window.dispatchEvent(new CustomEvent('schedule:completed')); } catch {}
             form.reset()
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Something went wrong")

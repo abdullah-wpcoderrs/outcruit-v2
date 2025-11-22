@@ -1,0 +1,3 @@
+name,email,phone_number,gender,location,residential_address,role_applying_for,academic_qualification,grade,cv_url
+Jane Doe,jane.doe@example.com,+1-555-000-1234,Female,Lagos,"12 Ade St, Lagos",Sales Associate,BSc Marketing,A,https://example.com/cv/jane.pdf
+John Smith,john.smith@example.com,+1-555-000-5678,Male,Abuja,"34 King Ave, Abuja",Operations Analyst,BSc Business,B,https://example.com/cv/john.pdf

@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronLeft, ChevronRight, LayoutDashboard, History, User, Users, Settings, X, LogOut } from "lucide-react"
+import { ChevronLeft, ChevronRight, LayoutDashboard, History, User, Settings, X, LogOut, Calendar } from "lucide-react"
 
 interface SidebarProps {
   activeNav: string
@@ -22,8 +22,8 @@ export default function Sidebar({
   onLogout,
 }: SidebarProps) {
   const navItems = [
+    { id: "candidates", label: "Schedule", icon: Calendar },
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "candidates", label: "Talent", icon: Users },
     { id: "history", label: "History", icon: History },
     { id: "profile", label: "Profile", icon: User },
     { id: "settings", label: "Settings", icon: Settings },

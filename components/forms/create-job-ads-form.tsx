@@ -74,7 +74,7 @@ export default function CreateJobAdsForm() {
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Recruiter Name */}
           <div>
-            <label htmlFor="recruiterName" className="block text-sm font-medium text-foreground mb-2">
+            <label htmlFor="recruiterName" className="block text-left text-sm font-medium text-foreground mb-2">
               Recruiter Name <span className="text-error">*</span>
             </label>
             <input
@@ -89,7 +89,7 @@ export default function CreateJobAdsForm() {
 
           {/* JD Name */}
           <div>
-            <label htmlFor="jdName" className="block text-sm font-medium text-foreground mb-2">
+            <label htmlFor="jdName" className="block text-left text-sm font-medium text-foreground mb-2">
               JD Name <span className="text-error">*</span>
             </label>
             <input
@@ -104,7 +104,7 @@ export default function CreateJobAdsForm() {
 
           {/* Upload JD */}
           <div>
-            <label htmlFor="jdFile" className="block text-sm font-medium text-foreground mb-2">
+            <label htmlFor="jdFile" className="block text-left text-sm font-medium text-foreground mb-2">
               Upload JD <span className="text-error">*</span>
             </label>
             <div className="flex items-center gap-3 rounded-lg border border-border bg-input px-3 sm:px-4 py-2">

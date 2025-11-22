@@ -71,7 +71,7 @@ export default function TalentSortingForms() {
 
           {/* Recruiter Name */}
           <div>
-            <label htmlFor="recruiterName" className="block text-sm font-medium text-foreground mb-2">
+            <label htmlFor="recruiterName" className="block text-left text-sm font-medium text-foreground mb-2">
               Recruiter Name <span className="text-error">*</span>
             </label>
             <input
@@ -86,7 +86,7 @@ export default function TalentSortingForms() {
 
           {/* Name Of Job */}
           <div>
-            <label htmlFor="jobName" className="block text-sm font-medium text-foreground mb-2">
+            <label htmlFor="jobName" className="block text-left text-sm font-medium text-foreground mb-2">
               Name Of Job <span className="text-error">*</span>
             </label>
             <input
@@ -101,7 +101,7 @@ export default function TalentSortingForms() {
 
           {/* Response Sheet URL */}
           <div>
-            <label htmlFor="responseSheetUrl" className="block text-sm font-medium text-foreground mb-2">
+            <label htmlFor="responseSheetUrl" className="block text-left text-sm font-medium text-foreground mb-2">
               Response Sheet Url <span className="text-error">*</span>
             </label>
             <input

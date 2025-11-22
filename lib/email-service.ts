@@ -26,7 +26,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     const key = JSON.parse(fs.readFileSync(keyFile, 'utf8'));
 
     const scopes = ['https://www.googleapis.com/auth/gmail.send'];
-    const jwt = new google.auth.JWT(key.client_email, undefined, key.private_key, scopes);
+    const jwt = new google.auth.JWT({ email: key.client_email, key: key.private_key, scopes });
 
     // Obtain access token
     const accessTokenResponse = await jwt.authorize();

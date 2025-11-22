@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select"
 import { toast } from "sonner"
 import { Loader2, Mail } from "lucide-react"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 const formSchema = z.object({
     emailType: z.enum(["interview_schedule", "congratulatory", "rejection"], {
@@ -32,13 +32,13 @@ const formSchema = z.object({
 })
 
 interface SendEmailFormProps {
-    jobTrackerId: string
+    talentListId: string
     jobName: string
 }
 
-export function SendEmailForm({ jobTrackerId, jobName }: SendEmailFormProps) {
+export function SendEmailForm({ talentListId, jobName }: SendEmailFormProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const [confirmOpen, setConfirmOpen] = useState(false)
+    const [previewData, setPreviewData] = useState<any>(null)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -59,19 +59,31 @@ export function SendEmailForm({ jobTrackerId, jobName }: SendEmailFormProps) {
         }
     }
 
-    async function executeSend(type: string) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true)
         try {
             const response = await fetch("/api/candidates/communicate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ jobTrackerId, jobName, emailType: type }),
+                body: JSON.stringify({
+                    talentListId,
+                    jobName,
+                    emailType: values.emailType,
+                }),
             })
+
             const data = await response.json()
-            if (!response.ok) throw new Error(data.error || "Failed to send emails")
-            toast.success(`Processed emails: ${data.successCount} sent, ${data.failCount} failed`)
-            if (data.message?.includes("No candidates")) toast.info(data.message)
-            setConfirmOpen(false)
+
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to send emails")
+            }
+
+            toast.success(
+                `Processed emails: ${data.successCount} sent, ${data.failCount} failed`
+            )
+            if (data.message.includes("No candidates")) {
+                toast.info(data.message)
+            }
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Something went wrong")
         } finally {
@@ -82,7 +94,7 @@ export function SendEmailForm({ jobTrackerId, jobName }: SendEmailFormProps) {
     return (
         <div className="space-y-8 max-w-2xl">
             <Form {...form}>
-                <form onSubmit={(e) => { e.preventDefault(); if (emailType) setConfirmOpen(true); }} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FormField
                         control={form.control}
                         name="emailType"
@@ -109,27 +121,16 @@ export function SendEmailForm({ jobTrackerId, jobName }: SendEmailFormProps) {
                         )}
                     />
 
-                    <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Confirm broadcast</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2">
-                                    <Mail className="h-4 w-4" />
-                                    <span>Send “{emailType || ''}” emails for <strong>{jobName}</strong></span>
-                                </div>
-                                <p>Emails will be sent to all eligible candidates for this role.</p>
-                            </div>
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={isLoading}>Cancel</Button>
-                                <Button onClick={() => emailType && executeSend(emailType)} disabled={isLoading}>
-                                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Confirm Send
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                    {emailType && (
+                        <Alert>
+                            <Mail className="h-4 w-4" />
+                            <AlertTitle>Ready to Broadcast</AlertTitle>
+                            <AlertDescription>
+                                This will send emails to all eligible candidates for the <strong>{jobName}</strong> role.
+                                Please ensure your email service is configured.
+                            </AlertDescription>
+                        </Alert>
+                    )}
 
                     <Button type="submit" disabled={isLoading || !emailType}>
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
