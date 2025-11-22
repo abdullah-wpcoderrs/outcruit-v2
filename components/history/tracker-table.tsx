@@ -315,7 +315,7 @@ export function TrackerTable({ data, onUpdate, onDelete, onBulkAction, onRefresh
             </div>
 
             {/* Bulk Actions Bar */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4 bg-muted/50 rounded-lg border">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4 bg-card rounded-lg border shadow-sm">
                 <Select value={bulkAction} onValueChange={setBulkAction}>
                     <SelectTrigger className="w-full sm:w-[200px]">
                         <SelectValue placeholder="Bulk Actions" />
@@ -353,7 +353,7 @@ export function TrackerTable({ data, onUpdate, onDelete, onBulkAction, onRefresh
             </div>
 
             {/* Table */}
-            <div className="rounded-md border overflow-x-auto">
+            <div className="rounded-lg border bg-card shadow-sm overflow-x-auto px-[5px]">
                 <Table>
                     <TableHeader>
                         <TableRow>

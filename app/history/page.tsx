@@ -268,11 +268,16 @@ export default function HistoryPage() {
                     </TabsContent>
 
                     <TabsContent value="talent-sorting" className="space-y-4">
-                        <div className="flex items-center justify-end gap-2">
-                            <span className="text-xs text-muted-foreground">View</span>
-                            <div className="flex rounded-md border">
-                                <button className={`px-3 py-1 text-xs ${talentView === 'documents' ? 'bg-accent text-accent-foreground' : ''}`} onClick={() => setTalentView('documents')}>Documents</button>
-                                <button className={`px-3 py-1 text-xs ${talentView === 'table' ? 'bg-accent text-accent-foreground' : ''}`} onClick={() => setTalentView('table')}>Table</button>
+                        <div className="flex items-center justify-between gap-2">
+                            <Button asChild>
+                                <a href="/dashboard?tab=talent-sorting">Sort New</a>
+                            </Button>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">View</span>
+                                <div className="flex rounded-md border">
+                                    <button className={`px-3 py-1 text-xs ${talentView === 'documents' ? 'bg-accent text-accent-foreground' : ''}`} onClick={() => setTalentView('documents')}>Documents</button>
+                                    <button className={`px-3 py-1 text-xs ${talentView === 'table' ? 'bg-accent text-accent-foreground' : ''}`} onClick={() => setTalentView('table')}>Table</button>
+                                </div>
                             </div>
                         </div>
                         {talentLists.length === 0 ? (

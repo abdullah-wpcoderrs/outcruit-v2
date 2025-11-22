@@ -116,7 +116,7 @@ export function TalentSortingTable() {
         )}
       </div>
 
-      <div className="border rounded-md">
+      <div className="rounded-lg border bg-card shadow-sm overflow-x-auto px-[5px]">
         <Table>
           <TableHeader>
             <TableRow>
