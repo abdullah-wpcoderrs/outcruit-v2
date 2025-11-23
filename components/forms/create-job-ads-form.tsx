@@ -13,6 +13,7 @@ export default function CreateJobAdsForm() {
   const [formData, setFormData] = useState({
     jdName: "",
     jdFile: null as File | null,
+    applicationFormUrl: "",
   })
   const [isLoading, setIsLoading] = useState(false)
   const [successModal, setSuccessModal] = useState(false)
@@ -23,7 +24,7 @@ export default function CreateJobAdsForm() {
     e.preventDefault()
 
     // Validate required fields; recruiter name is now derived from profile
-    if (!formData.jdName || !formData.jdFile || !user?.email) {
+    if (!formData.jdName || !formData.jdFile || !user?.email || !formData.applicationFormUrl) {
       setErrorMessage("Please fill in all required fields")
       setErrorModal(true)
       return
@@ -32,6 +33,15 @@ export default function CreateJobAdsForm() {
     // Check if file is PDF
     if (formData.jdFile.type !== 'application/pdf') {
       setErrorMessage("Please upload a PDF file only")
+      setErrorModal(true)
+      return
+    }
+
+    // Validate Application Form URL format before submitting
+    try {
+      new URL(formData.applicationFormUrl)
+    } catch {
+      setErrorMessage("Please enter a valid Application Form URL")
       setErrorModal(true)
       return
     }
@@ -61,6 +71,8 @@ export default function CreateJobAdsForm() {
       formDataToSend.append('recruiterName', recruiterNameFromProfile)
       formDataToSend.append('recruiterEmail', user.email)
       formDataToSend.append('userId', user.id)
+      // New: Application form URL to be used downstream
+      formDataToSend.append('applicationFormUrl', formData.applicationFormUrl)
 
       const response = await fetch(webhookUrl, {
         method: "POST",
@@ -69,7 +81,7 @@ export default function CreateJobAdsForm() {
 
       if (response.ok) {
         setSuccessModal(true)
-        setFormData({ jdName: "", jdFile: null })
+        setFormData({ jdName: "", jdFile: null, applicationFormUrl: "" })
       } else {
         throw new Error(`Submission failed: ${response.statusText}`)
       }
@@ -125,6 +137,21 @@ export default function CreateJobAdsForm() {
                 {formData.jdFile?.name || "No file selected"}
               </span>
             </div>
+          </div>
+
+          {/* Application Form URL */}
+          <div>
+            <label htmlFor="applicationFormUrl" className="block text-left text-sm font-medium text-foreground mb-2">
+              Application Form URL <span className="text-error">*</span>
+            </label>
+            <input
+              id="applicationFormUrl"
+              type="url"
+              placeholder="https://example.com/apply"
+              value={formData.applicationFormUrl}
+              onChange={(e) => setFormData({ ...formData, applicationFormUrl: e.target.value })}
+              className="w-full rounded-lg border border-border bg-input px-3 sm:px-4 py-2 text-sm sm:text-base text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
+            />
           </div>
 
           <button

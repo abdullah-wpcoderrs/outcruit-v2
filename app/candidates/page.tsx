@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
 import AuthenticatedLayout from "@/components/authenticated-layout"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +10,6 @@ import { ScheduleInterviewForm } from "@/components/schedule-interview-form"
 import { SendEmailForm } from "@/components/send-email-form"
 
 export default function CandidatesPage() {
-    const searchParams = useSearchParams()
     const [talentLists, setTalentLists] = useState<{ id: string, name: string }[]>([])
     const [selectedTalentListId, setSelectedTalentListId] = useState<string>("")
     const [selectedJobName, setSelectedJobName] = useState<string>("")
