@@ -35,6 +35,7 @@ psql "$DATABASE_URL" -f migrations/neon_schema.sql
 
 - Database: `DATABASE_URL`
 - Auth/JWT: `JWT_SECRET`
+- Site: `NEXT_PUBLIC_SITE_URL` → set to your production domain, e.g., `https://YOUR-DOMAIN.example`
 - Gmail (Service Account fallback):
   - `GMAIL_SERVICE_ACCOUNT_KEY` → path to JSON key file
   - `GMAIL_SENDER_EMAIL` → organization sender address
@@ -54,6 +55,12 @@ psql "$DATABASE_URL" -f migrations/neon_schema.sql
 - Settings/Profile → Connect Gmail button starts Google OAuth
 - Tokens are stored in `public.user_google_tokens`
 - Email sending prefers a connected user token; falls back to the organization service account
+
+### Open Graph Configuration
+
+- The app generates an OG image at `/opengraph-image`.
+- `NEXT_PUBLIC_SITE_URL` is used as `metadataBase` for absolute OG URLs.
+- Ensure `NEXT_PUBLIC_SITE_URL` matches your deployed hostname, e.g., `https://YOUR-DOMAIN.example`.
 
 ## Build and Run
 
