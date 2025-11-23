@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     description: "Recruitment workflow automation",
     url: process.env.NEXT_PUBLIC_SITE_URL || "https://outcruit-v2.vercel.app",
     siteName: "Outcruit",
-    images: [{ url: "/opengraph-image" }],
+    images: [{ url: "/og-image.png" }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Outcruit",
     description: "Recruitment workflow automation",
-    images: ["/opengraph-image"],
+    images: ["/og-image.png"],
   },
   icons: {
     icon: [
