@@ -357,6 +357,31 @@ export default function ProfilePage() {
                         )}
                     </CardContent>
                 </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Connect Gmail</CardTitle>
+                        <CardDescription>
+                            Connect your Gmail so emails can be sent from your mailbox.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button
+                          variant="outline"
+                          className="gap-2"
+                          onClick={async () => {
+                            try {
+                              const res = await fetch('/api/auth/google/url')
+                              const j = await res.json()
+                              if (j?.url) window.location.href = j.url
+                            } catch {}
+                          }}
+                        >
+                          <Mail className="h-4 w-4" />
+                          Connect Gmail
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
         </AuthenticatedLayout>
     )
