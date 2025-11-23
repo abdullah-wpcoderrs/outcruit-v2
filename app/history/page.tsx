@@ -91,7 +91,9 @@ export default function HistoryPage() {
             a.href = url
             const dispo = res.headers.get('Content-Disposition') || ''
             const match = dispo.match(/filename="(.+?)"/)
-            a.download = match?.[1] || `${title}.pdf`
+            const ct = res.headers.get('Content-Type') || ''
+            const fallbackExt = ct.includes('csv') ? 'csv' : 'pdf'
+            a.download = match?.[1] || `${title}.${fallbackExt}`
             document.body.appendChild(a)
             a.click()
             a.remove()

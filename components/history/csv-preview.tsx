@@ -40,7 +40,7 @@ export function CsvPreview({ fileId }: { fileId: string }) {
   useEffect(() => {
     ;(async () => {
       try {
-        const res = await fetch(`/api/files/${fileId}`)
+        const res = await fetch(`/api/files/${fileId}?preview=1`)
         const ct = res.headers.get('Content-Type') || ''
         const text = await res.text()
         const data = parseCsv(text).filter(r => r.length > 0)
@@ -65,7 +65,7 @@ export function CsvPreview({ fileId }: { fileId: string }) {
     return <div className="p-4 text-sm text-destructive">{error}</div>
   }
   if (!isCsv) {
-    return <iframe src={`/api/files/${fileId}`} className="w-full h-full" title="Document" />
+    return <iframe src={`/api/files/${fileId}?preview=1`} className="w-full h-full" title="Document" />
   }
 
   return (

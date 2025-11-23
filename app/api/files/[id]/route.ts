@@ -38,6 +38,12 @@ export async function GET(
                 contentType = 'text/plain; charset=utf-8';
             }
         }
+        if (isDownload) {
+            const name: string = file.filename || ''
+            if (contentType.includes('csv') || name.toLowerCase().endsWith('.csv')) {
+                contentType = 'text/csv; charset=utf-8'
+            }
+        }
 
         const disposition = isDownload ? 'attachment' : 'inline';
 
