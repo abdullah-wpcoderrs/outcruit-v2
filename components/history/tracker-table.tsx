@@ -31,6 +31,7 @@ interface TrackerItem {
     role_name: string;
     application_sheet_id: string;
     row_no: number;
+    grade?: string;
     created_at: string;
     updated_at: string;
 }
@@ -59,6 +60,7 @@ export function TrackerTable({ data, onUpdate, onDelete, onBulkAction, onRefresh
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [bulkAction, setBulkAction] = useState<string>('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [sheetUrl, setSheetUrl] = useState<string>("");
 
     // Search & Filter
     const [searchQuery, setSearchQuery] = useState('');
@@ -94,6 +96,18 @@ export function TrackerTable({ data, onUpdate, onDelete, onBulkAction, onRefresh
 
         return filtered;
     }, [data, searchQuery, statusFilter]);
+
+    // Load tracker sheet URL from server env via API
+    useMemo(() => {
+        (async () => {
+            try {
+                const res = await fetch('/api/env/google-sheet-url')
+                if (!res.ok) return
+                const j = await res.json()
+                if (j?.url) setSheetUrl(String(j.url))
+            } catch {}
+        })()
+    }, [])
 
     // Sort data
     const sortedData = useMemo(() => {
@@ -215,13 +229,14 @@ export function TrackerTable({ data, onUpdate, onDelete, onBulkAction, onRefresh
 
     const handleExportCSV = () => {
         // Prepare CSV data
-        const headers = ['Row No', 'Brief Name', 'Status', 'Recruiter Email', 'Role Name', 'Application Sheet ID', 'Created At', 'Updated At'];
+        const headers = ['Row No', 'Brief Name', 'Status', 'Recruiter Email', 'Role Name', 'Grade', 'Application Sheet ID', 'Created At', 'Updated At'];
         const csvData = sortedData.map(item => [
             item.row_no || '',
             item.brief_name || '',
             item.status || '',
             item.recruiter_email || '',
             item.role_name || '',
+            item.grade || '',
             item.application_sheet_id || '',
             new Date(item.created_at).toLocaleString(),
             new Date(item.updated_at).toLocaleString()
@@ -350,6 +365,17 @@ export function TrackerTable({ data, onUpdate, onDelete, onBulkAction, onRefresh
                         </Button>
                     </div>
                 )}
+
+                <div className="ml-auto">
+                    <Button
+                        onClick={() => sheetUrl && window.open(sheetUrl, '_blank')}
+                        className="bg-green-500 hover:bg-green-600 text-white"
+                        disabled={!sheetUrl}
+                    >
+                        Open Google Sheet tracker
+                        <ExternalLink className="h-4 w-4 ml-2" />
+                    </Button>
+                </div>
             </div>
 
             {/* Table */}
@@ -393,6 +419,7 @@ export function TrackerTable({ data, onUpdate, onDelete, onBulkAction, onRefresh
                                     {getSortIcon('role_name')}
                                 </div>
                             </TableHead>
+                            <TableHead className="min-w-[120px] hidden md:table-cell">Grade</TableHead>
                             <TableHead className="min-w-[120px]">Sheet</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -448,6 +475,7 @@ export function TrackerTable({ data, onUpdate, onDelete, onBulkAction, onRefresh
                                             {truncateText(item.role_name, 35)}
                                         </span>
                                     </TableCell>
+                                    <TableCell className="hidden md:table-cell">{item.grade || '-'}</TableCell>
                                     <TableCell>
                                         <Button
                                             variant="outline"

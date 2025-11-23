@@ -75,15 +75,16 @@ The JD Tracker form sends multipart FormData with only the required fields:
 - Content Type: `json`
  - Body example (match app API):
  ```json
- {
-   "briefName": "={{ $json.briefName }}",
-   "status": "={{ $json.status }}",
-   "recruiterEmail": "={{ $json.recruiterEmail }}",
-   "roleName": "={{ $json.roleName || $json.briefName }}",
-   "rowNo": "={{ $json.row_no || $json.rowNo || '' }}",
-   "applicationSheetId": "={{ $json.applicationSheetId }}",
-   "userId": "={{ $json.userId || '' }}"
- }
+  {
+    "briefName": "={{ $json.briefName }}",
+    "status": "={{ $json.status }}",
+    "recruiterEmail": "={{ $json.recruiterEmail }}",
+    "roleName": "={{ $json.roleName || $json.briefName }}",
+    "rowNo": "={{ $json.row_no || $json.rowNo || '' }}",
+    "grade": "={{ $json.grade || '' }}",
+    "applicationSheetId": "={{ $json.applicationSheetId }}",
+    "userId": "={{ $json.userId || '' }}"
+  }
  ```
 - App behavior:
   - Current implementation resolves `userId` by email if `userId` is absent

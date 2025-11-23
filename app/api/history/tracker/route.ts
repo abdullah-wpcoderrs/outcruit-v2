@@ -16,11 +16,22 @@ export async function GET(request: NextRequest) {
 
         const client = await pool.connect();
         try {
+            const colsBase = ['id','brief_name','status','recruiter_email','role_name','application_sheet_id','created_at','updated_at']
+            let hasRowNo = false
+            let hasGrade = false
+            try {
+                const meta = await client.query(
+                    `select column_name from information_schema.columns where table_schema='public' and table_name='job_trackers' and column_name in ('row_no','grade')`
+                )
+                const names = meta.rows.map((r: any) => r.column_name)
+                hasRowNo = names.includes('row_no')
+                hasGrade = names.includes('grade')
+            } catch {}
+            const cols = [...colsBase]
+            if (hasRowNo) cols.splice(6, 0, 'row_no')
+            if (hasGrade) cols.splice(hasRowNo ? 7 : 6, 0, 'grade')
             const result = await client.query(
-                `SELECT id, brief_name, status, recruiter_email, role_name, application_sheet_id, row_no, created_at, updated_at 
-                 FROM public.job_trackers 
-                 WHERE user_id = $1 
-                 ORDER BY created_at DESC`,
+                `SELECT ${cols.join(', ')} FROM public.job_trackers WHERE user_id = $1 ORDER BY created_at DESC`,
                 [userId]
             );
             return NextResponse.json(result.rows);

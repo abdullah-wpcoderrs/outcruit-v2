@@ -81,3 +81,7 @@ INSERT INTO public.job_trackers (
 
 -- Verification
 SELECT * FROM public.job_trackers;
+
+-- Add optional columns used by application flows
+ALTER TABLE public.job_trackers ADD COLUMN IF NOT EXISTS row_no INTEGER;
+ALTER TABLE public.job_trackers ADD COLUMN IF NOT EXISTS grade TEXT;

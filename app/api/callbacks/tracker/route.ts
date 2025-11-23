@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
         let roleName = body.roleName ?? body.Role_Name ?? ''
         let applicationSheetId = body.applicationSheetId ?? body.Application_Sheet_ID ?? ''
         const rowNoRaw = body.rowNo ?? body.row_no ?? null
+        const gradeRaw = body.grade ?? body.Grade ?? null
         const incomingUserId = body.userId ?? body.UserId ?? body.user_id ?? ''
 
         const bn = String(briefName).trim()
@@ -31,6 +32,12 @@ export async function POST(request: NextRequest) {
             const n = parseInt(String(r), 10)
             return Number.isFinite(n) ? n : null
         })()
+        const gradeVal = (() => {
+            const g = gradeRaw
+            if (g === null || g === undefined) return null
+            const s = String(g).trim()
+            return s || null
+        })()
         const trackerStatus = ['Active', 'Not Active'].includes(String(status).trim()) ? String(status).trim() : 'Active'
 
         // Prefer userId from payload; fallback to lookup by email when missing
@@ -49,13 +56,27 @@ export async function POST(request: NextRequest) {
         const roleForInsert = resolvedUserId ? 'user' : 'admin';
 
         await withClient(resolvedUserId || undefined, roleForInsert, async (client) => {
+            const cols: string[] = ['user_id','brief_name','status','recruiter_email','role_name','application_sheet_id']
+            const vals: any[] = [resolvedUserId, bn, trackerStatus, re, roleName, asId]
+            try {
+                const res = await client.query(
+                    `select column_name from information_schema.columns where table_schema='public' and table_name='job_trackers' and column_name in ('row_no','grade')`
+                )
+                const names = res.rows.map((r: any) => r.column_name)
+                if (names.includes('row_no')) {
+                    cols.push('row_no')
+                    vals.push(rowNo)
+                }
+                if (names.includes('grade')) {
+                    cols.push('grade')
+                    vals.push(gradeVal)
+                }
+            } catch {}
+            const placeholders = cols.map((_, i) => `$${i+1}`).join(', ')
             await client.query(
-                `INSERT INTO public.job_trackers (user_id, brief_name, status, recruiter_email, role_name, application_sheet_id, row_no)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-                [
-                    resolvedUserId, bn, trackerStatus, re, roleName, asId, rowNo
-                ]
-            );
+                `INSERT INTO public.job_trackers (${cols.join(', ')}) VALUES (${placeholders})`,
+                vals
+            )
         });
 
         return NextResponse.json({ success: true });
