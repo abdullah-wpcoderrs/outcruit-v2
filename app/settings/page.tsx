@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Bell, Palette, Shield, Lock, Save } from "lucide-react"
+import { Bell, Palette, Shield, Lock, Save, Mail } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface Preferences {
@@ -361,12 +361,23 @@ export default function SettingsPage() {
                                 </div>
 
                                 <div className="border-t pt-6 space-y-4">
-                                    <h3 className="text-lg font-semibold">Two-Factor Authentication</h3>
+                                    <h3 className="text-lg font-semibold">Connect Gmail</h3>
                                     <p className="text-sm text-muted-foreground">
-                                        Add an extra layer of security to your account
+                                        Connect your Gmail so emails can be sent from your mailbox.
                                     </p>
-                                    <Button variant="outline" disabled>
-                                        Enable Two-Factor Authentication
+                                    <Button
+                                      variant="outline"
+                                      className="gap-2"
+                                      onClick={async () => {
+                                        try {
+                                          const res = await fetch('/api/auth/google/url')
+                                          const j = await res.json()
+                                          if (j?.url) window.location.href = j.url
+                                        } catch {}
+                                      }}
+                                    >
+                                      <Mail className="h-4 w-4" />
+                                      Connect Gmail
                                     </Button>
                                 </div>
                             </CardContent>
