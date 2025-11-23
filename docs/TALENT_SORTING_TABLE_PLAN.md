@@ -87,6 +87,7 @@ ALTER TABLE public.talent_lists
 
 - Ingestion: extend `POST /api/callbacks/talent-sort` to accept candidates array and optional `sheetUrl`/`applicationSheetId`.
   - Body keys:
+    - `userId` (uuid) — include from app form to align with RLS
     - `jobTitle` (string)
     - `fileId` (uuid)
     - `candidateCount` (number)
@@ -95,7 +96,7 @@ ALTER TABLE public.talent_lists
     - `applicationSheetId` (string, optional)
     - `candidates` (array of candidate objects)
   - Behavior:
-    - Resolve `user_id` from `recruiterEmail` (case-insensitive, trimmed).
+    - Prefer `userId` from payload; fallback to resolving by `recruiterEmail`.
     - Insert `talent_lists` row; set `sheet_url`, `application_sheet_id` if present.
     - Bulk insert candidates into `talent_list_candidates` with `user_id` and `talent_list_id`.
 

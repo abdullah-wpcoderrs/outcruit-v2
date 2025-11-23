@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import { withClient, pool } from '@/lib/db';
 import { sendEmail } from '@/lib/email-service';
 import { emailTemplates, EmailTemplateData } from '@/lib/email-templates';
 
@@ -47,15 +47,17 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Fetch candidates
-        const fetchResult = talentListId
-            ? await pool.query(
-                'SELECT * FROM talent_list_candidates WHERE talent_list_id = $1 AND status = $2',
-                [talentListId, targetStatus]
-            )
-            : await pool.query(
-                'SELECT * FROM candidates WHERE job_tracker_id = $1 AND status = $2',
-                [jobTrackerId, targetStatus]
-            );
+        const fetchResult = await withClient(undefined, 'admin', async (client) => {
+            return talentListId
+                ? client.query(
+                    'SELECT * FROM talent_list_candidates WHERE talent_list_id = $1 AND status = $2',
+                    [talentListId, targetStatus]
+                )
+                : client.query(
+                    'SELECT * FROM candidates WHERE job_tracker_id = $1 AND status = $2',
+                    [jobTrackerId, targetStatus]
+                );
+        })
         const candidates = fetchResult.rows;
 
         if (!candidates || candidates.length === 0) {
@@ -66,7 +68,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Send emails
-        const results = await Promise.allSettled(candidates.map(async (candidate) => {
+        const results = await Promise.allSettled(candidates.map(async (candidate: any) => {
             const templateData: EmailTemplateData = {
                 candidateName: candidate.name,
                 roleApplyingFor: candidate.role_applying_for,
@@ -88,8 +90,7 @@ export async function POST(request: NextRequest) {
             });
 
             // Log communication and update status
-            const client = await pool.connect();
-            try {
+            const sendAndLog = await withClient(undefined, 'admin', async (client) => {
                 await client.query('BEGIN');
 
                 // Log email
@@ -109,12 +110,8 @@ export async function POST(request: NextRequest) {
                 }
 
                 await client.query('COMMIT');
-            } catch (e) {
-                await client.query('ROLLBACK');
-                throw e;
-            } finally {
-                client.release();
-            }
+                return true
+            })
 
             return candidate.id;
         }));

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import { withClient } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -15,17 +15,13 @@ export async function GET(request: NextRequest) {
         }
         const userId = (payload.userId || payload.sub) as string;
 
-        const client = await pool.connect();
-        try {
-            const result = await client.query(
+        const result = await withClient(userId, payload.role as string, async (client) => {
+            return client.query(
                 'SELECT * FROM public.job_ads WHERE user_id = $1 ORDER BY created_at DESC',
                 [userId]
             );
-
-            return NextResponse.json(result.rows);
-        } finally {
-            client.release();
-        }
+        })
+        return NextResponse.json(result.rows);
     } catch (error) {
         console.error('Error fetching job ads:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

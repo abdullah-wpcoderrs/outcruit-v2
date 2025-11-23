@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import { withClient } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -18,10 +18,12 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        await pool.query(
-            'UPDATE notifications SET read_at = NOW() WHERE id = $1 AND user_id = $2',
-            [id, payload.userId]
-        );
+        const result = await withClient(payload.userId as string, payload.role as string, async (client) => {
+            return client.query(
+                'UPDATE notifications SET read_at = NOW() WHERE id = $1 AND user_id = $2',
+                [id, payload.userId]
+            )
+        })
 
         return NextResponse.json({ success: true });
     } catch (error) {

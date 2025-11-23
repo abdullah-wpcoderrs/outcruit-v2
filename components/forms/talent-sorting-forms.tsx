@@ -32,7 +32,12 @@ export default function TalentSortingForms() {
     setIsLoading(true)
 
     try {
-      const webhookUrl = process.env.NEXT_PUBLIC_TALENT_SORTING_WEBHOOK || "https://example.com/webhook"
+      // Read and sanitize the webhook URL from environment variables
+      const raw = process.env.NEXT_PUBLIC_TALENT_SORTING_WEBHOOK
+      const webhookUrl = (raw ? raw.trim() : "https://example.com/webhook")
+
+      // Validate URL early to catch misconfiguration
+      new URL(webhookUrl)
 
       // Derive recruiter name from user profile; fallback to email local-part if name is missing
       const recruiterNameFromProfile = (user?.name && user.name.trim())
@@ -44,6 +49,7 @@ export default function TalentSortingForms() {
         recruiterEmail: user.email,
         jobName: formData.jobName,
         responseSheetUrl: formData.responseSheetUrl,
+        userId: user.id,
       }
 
       const response = await fetch(webhookUrl, {

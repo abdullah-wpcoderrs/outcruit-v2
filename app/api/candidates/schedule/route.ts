@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import { withClient } from '@/lib/db';
 import { scheduleInterviews, ScheduleConfig } from '@/lib/smart-scheduler';
 
 export async function POST(request: NextRequest) {
@@ -15,15 +15,17 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Fetch Unscheduled candidates for this source
-        const fetchResult = talentListId
-            ? await pool.query(
-                "SELECT * FROM talent_list_candidates WHERE talent_list_id = $1 AND status != 'Scheduled'",
-                [talentListId]
-            )
-            : await pool.query(
-                "SELECT * FROM candidates WHERE job_tracker_id = $1 AND status = 'Unscheduled'",
-                [jobTrackerId]
-            );
+        const fetchResult = await withClient(undefined, 'admin', async (client) => {
+            return talentListId
+                ? client.query(
+                    "SELECT * FROM talent_list_candidates WHERE talent_list_id = $1 AND status != 'Scheduled'",
+                    [talentListId]
+                )
+                : client.query(
+                    "SELECT * FROM candidates WHERE job_tracker_id = $1 AND status = 'Unscheduled'",
+                    [jobTrackerId]
+                );
+        })
         const candidates = fetchResult.rows;
 
         if (!candidates || candidates.length === 0) {
@@ -38,8 +40,7 @@ export async function POST(request: NextRequest) {
 
         // 3. Update candidates in database
         // Using a transaction for safety
-        const client = await pool.connect();
-        try {
+        const txResult = await withClient(undefined, 'admin', async (client) => {
             await client.query('BEGIN');
 
             for (const candidate of scheduledCandidates) {
@@ -113,12 +114,8 @@ export async function POST(request: NextRequest) {
             }
 
             await client.query('COMMIT');
-        } catch (e) {
-            await client.query('ROLLBACK');
-            throw e;
-        } finally {
-            client.release();
-        }
+            return true
+        })
 
         // Optional: update Google Sheet via n8n webhook if configured
         try {

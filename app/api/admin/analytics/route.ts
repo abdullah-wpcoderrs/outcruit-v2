@@ -40,11 +40,31 @@ export async function GET() {
       }
 
       const [usersRes, notificationsRes, jobAdsRes, talentListsRes, jobTrackersRes] = await Promise.all([
-        client.query('SELECT id, email, name, role, created_at FROM public.users ORDER BY created_at DESC LIMIT 10'),
-        client.query('SELECT * FROM public.notifications ORDER BY created_at DESC LIMIT 10'),
-        client.query('SELECT * FROM public.job_ads ORDER BY created_at DESC LIMIT 10'),
-        client.query('SELECT * FROM public.talent_lists ORDER BY created_at DESC LIMIT 10'),
-        client.query('SELECT * FROM public.job_trackers ORDER BY created_at DESC LIMIT 10')
+        client.query('SELECT id, email, name, role, created_at FROM public.users ORDER BY created_at DESC LIMIT 50'),
+        client.query(`
+          SELECT n.*, u.name as user_name, u.email as user_email 
+          FROM public.notifications n 
+          LEFT JOIN public.users u ON n.user_id = u.id 
+          ORDER BY n.created_at DESC LIMIT 50
+        `),
+        client.query(`
+          SELECT j.*, u.name as user_name, u.email as user_email 
+          FROM public.job_ads j 
+          LEFT JOIN public.users u ON j.user_id = u.id 
+          ORDER BY j.created_at DESC LIMIT 50
+        `),
+        client.query(`
+          SELECT t.*, u.name as user_name, u.email as user_email 
+          FROM public.talent_lists t 
+          LEFT JOIN public.users u ON t.user_id = u.id 
+          ORDER BY t.created_at DESC LIMIT 50
+        `),
+        client.query(`
+          SELECT jt.*, u.name as user_name, u.email as user_email 
+          FROM public.job_trackers jt 
+          LEFT JOIN public.users u ON jt.user_id = u.id 
+          ORDER BY jt.created_at DESC LIMIT 50
+        `)
       ])
 
       return { stats, latest: { users: usersRes, notifications: notificationsRes, job_ads: jobAdsRes, talent_lists: talentListsRes, job_trackers: jobTrackersRes } }

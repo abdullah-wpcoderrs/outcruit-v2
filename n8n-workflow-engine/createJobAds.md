@@ -2,6 +2,14 @@
 
 # This workflow helps recruiter to extract job details from job brief document and create a job ad.
 
+### Incoming Payload (from app)
+- `jdName` string
+- `jdFile` PDF binary
+- `jdFileName` string
+- `recruiterName` string
+- `recruiterEmail` string
+- `userId` UUID
+
 ## Workflow Steps
 
 1. Extract Text from Job Brief Document

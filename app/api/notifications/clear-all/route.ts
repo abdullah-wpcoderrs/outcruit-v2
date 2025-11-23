@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import { withClient } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -17,10 +17,12 @@ export async function POST() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        await pool.query(
-            'DELETE FROM notifications WHERE user_id = $1',
-            [payload.userId]
-        );
+        const result = await withClient(payload.userId as string, payload.role as string, async (client) => {
+            return client.query(
+                'DELETE FROM notifications WHERE user_id = $1',
+                [payload.userId]
+            )
+        })
 
         return NextResponse.json({ success: true });
     } catch (error) {

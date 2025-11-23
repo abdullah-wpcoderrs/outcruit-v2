@@ -39,7 +39,13 @@ export default function CreateJobAdsForm() {
     setIsLoading(true)
 
     try {
-      const webhookUrl = process.env.NEXT_PUBLIC_CREATE_JOB_ADS_WEBHOOK || "https://example.com/webhook"
+      // Read and sanitize the webhook URL from environment variables
+      // We trim to avoid leading/trailing spaces that can break fetch
+      const raw = process.env.NEXT_PUBLIC_CREATE_JOB_ADS_WEBHOOK
+      const webhookUrl = (raw ? raw.trim() : "https://example.com/webhook")
+
+      // Validate URL early to surface configuration issues clearly
+      new URL(webhookUrl)
 
       // Derive recruiter name from user profile; fallback to email local-part if name is missing
       const recruiterNameFromProfile = (user?.name && user.name.trim())
@@ -54,6 +60,7 @@ export default function CreateJobAdsForm() {
       // Recruiter name now comes from authenticated user's profile
       formDataToSend.append('recruiterName', recruiterNameFromProfile)
       formDataToSend.append('recruiterEmail', user.email)
+      formDataToSend.append('userId', user.id)
 
       const response = await fetch(webhookUrl, {
         method: "POST",

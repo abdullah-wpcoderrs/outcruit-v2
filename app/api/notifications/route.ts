@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import { withClient } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -15,16 +15,13 @@ export async function GET(request: NextRequest) {
         }
         const userId = (payload.userId || payload.sub) as string;
 
-        const client = await pool.connect();
-        try {
-            const result = await client.query(
+        const result = await withClient(userId, payload.role as string, async (client) => {
+            return client.query(
                 'SELECT id, type, message, job_name, recruiter_name, recruiter_email, created_at, read_at FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT 100',
                 [userId]
             );
-            return NextResponse.json({ notifications: result.rows });
-        } finally {
-            client.release();
-        }
+        });
+        return NextResponse.json({ notifications: result.rows });
     } catch (error) {
         return NextResponse.json({ notifications: [] }, { status: 500 });
     }

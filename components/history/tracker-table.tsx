@@ -215,7 +215,7 @@ export function TrackerTable({ data, onUpdate, onDelete, onBulkAction, onRefresh
 
     const handleExportCSV = () => {
         // Prepare CSV data
-        const headers = ['S/N', 'Brief Name', 'Status', 'Recruiter Email', 'Role Name', 'Application Sheet ID', 'Created At', 'Updated At'];
+        const headers = ['Row No', 'Brief Name', 'Status', 'Recruiter Email', 'Role Name', 'Application Sheet ID', 'Created At', 'Updated At'];
         const csvData = sortedData.map(item => [
             item.row_no || '',
             item.brief_name || '',
@@ -365,7 +365,7 @@ export function TrackerTable({ data, onUpdate, onDelete, onBulkAction, onRefresh
                             </TableHead>
                             <TableHead className="w-[80px] cursor-pointer" onClick={() => handleSort('row_no')}>
                                 <div className="flex items-center">
-                                    S/N
+                                    Row No
                                     {getSortIcon('row_no')}
                                 </div>
                             </TableHead>

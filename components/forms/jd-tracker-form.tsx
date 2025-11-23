@@ -42,7 +42,12 @@ export default function JDTrackerForm() {
     setIsLoading(true)
 
     try {
-      const webhookUrl = process.env.NEXT_PUBLIC_JD_TRACKER_WEBHOOK || "https://example.com/webhook"
+      // Read and sanitize the webhook URL from environment variables
+      const raw = process.env.NEXT_PUBLIC_JD_TRACKER_WEBHOOK
+      const webhookUrl = (raw ? raw.trim() : "https://example.com/webhook")
+
+      // Validate URL early to avoid silent fetch failures
+      new URL(webhookUrl)
       const recruitmentType = activeTab === "outsourcing" ? "Outsourcing Recruitment" : "One-Off Recruitment"
 
       // Derive recruiter name from user profile; fallback to email local-part if name is missing
@@ -60,6 +65,7 @@ export default function JDTrackerForm() {
       formDataToSend.append('recruiterName', recruiterNameFromProfile)
       formDataToSend.append('recruiterEmail', user.email)
       formDataToSend.append('recruitment_type', recruitmentType)
+      formDataToSend.append('userId', user.id)
 
       const response = await fetch(webhookUrl, {
         method: "POST",

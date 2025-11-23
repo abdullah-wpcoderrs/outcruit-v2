@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
+import { withClient } from '@/lib/db';
 import { verifyPassword, signToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -11,9 +11,12 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
         }
 
-        // Find user
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        const user = result.rows[0];
+        // Find user using an RLS-aware client. We set role to 'admin' for this lookup
+        // because login happens before we can set a per-user claim; policies allow admin read.
+        const lookup = await withClient(undefined, 'admin', async (client) => {
+            return client.query('SELECT * FROM users WHERE email = $1', [email]);
+        });
+        const user = lookup.rows[0];
 
         if (!user) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
