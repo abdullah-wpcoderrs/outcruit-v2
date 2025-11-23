@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { ExternalLink } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -84,7 +85,7 @@ export function TalentSortingTable() {
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2 items-center">
         <Select value={selectedListId} onValueChange={(v) => { setSelectedListId(v); setPage(1) }}>
-          <SelectTrigger className="w-64">
+          <SelectTrigger className="w-64 bg-white">
             <SelectValue placeholder="Select list" />
           </SelectTrigger>
           <SelectContent>
@@ -111,9 +112,7 @@ export function TalentSortingTable() {
             <SelectItem value="Not Qualified">Not Qualified</SelectItem>
           </SelectContent>
         </Select>
-        {!!sheetUrl && (
-          <Button variant="outline" onClick={() => window.open(sheetUrl, '_blank')}>Open Sheet</Button>
-        )}
+        {/* Removed inline Open Sheet button under selector */}
       </div>
 
       <div className="rounded-lg border bg-card shadow-sm overflow-x-auto px-[5px]">
@@ -149,7 +148,10 @@ export function TalentSortingTable() {
                   <TableCell>{it.role_applying_for ?? ''}</TableCell>
                   <TableCell>
                     {sheetUrl ? (
-                      <Button size="sm" variant="ghost" onClick={() => window.open(sheetUrl, '_blank')}>Open</Button>
+                      <Button size="sm" variant="ghost" onClick={() => window.open(sheetUrl, '_blank')} className="flex items-center gap-2">
+                        <ExternalLink className="h-3 w-3" />
+                        Open
+                      </Button>
                     ) : ''}
                   </TableCell>
                 </TableRow>

@@ -71,10 +71,10 @@ export function CsvPreview({ fileId }: { fileId: string }) {
   return (
     <div className="w-full h-full overflow-auto">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-green-50">
           <TableRow>
             {grid.headers.map((h, i) => (
-              <TableHead key={i} className="min-w-40">{h}</TableHead>
+              <TableHead key={i} className="min-w-40 font-semibold text-green-900">{h}</TableHead>
             ))}
           </TableRow>
         </TableHeader>
