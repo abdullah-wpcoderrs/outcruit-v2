@@ -37,7 +37,6 @@ export function TalentSortingTable() {
   const [q, setQ] = useState('')
   const [gender, setGender] = useState('')
   const [role, setRole] = useState('')
-  const [status, setStatus] = useState('')
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -60,7 +59,6 @@ export function TalentSortingTable() {
       if (q) params.set('q', q)
       if (gender && gender !== 'ALL') params.set('gender', gender)
       if (role) params.set('role', role)
-      if (status && status !== 'ALL') params.set('status', status)
       const res = await fetch(`/api/talent-lists/${selectedListId}/candidates?` + params.toString())
       if (res.ok) {
         const data = await res.json()
@@ -69,7 +67,7 @@ export function TalentSortingTable() {
       }
       setLoading(false)
     })()
-  }, [selectedListId, page, pageSize, q, gender, role, status])
+  }, [selectedListId, page, pageSize, q, gender, role])
 
   const currentList = useMemo(() => lists.find(l => l.id === selectedListId), [lists, selectedListId])
   const pages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize])
@@ -96,7 +94,7 @@ export function TalentSortingTable() {
         </Select>
         <Input placeholder="Search" value={q} onChange={(e) => { setQ(e.target.value); setPage(1) }} className="w-64" />
         <Select value={gender} onValueChange={(v) => { setGender(v); setPage(1) }}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="Gender" /></SelectTrigger>
+          <SelectTrigger className="w-40 bg-white"><SelectValue placeholder="Gender" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">All</SelectItem>
             <SelectItem value="Male">Male</SelectItem>
@@ -104,14 +102,6 @@ export function TalentSortingTable() {
           </SelectContent>
         </Select>
         <Input placeholder="Role" value={role} onChange={(e) => { setRole(e.target.value); setPage(1) }} className="w-48" />
-        <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1) }}>
-          <SelectTrigger className="w-48"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">All</SelectItem>
-            <SelectItem value="Passed">Passed</SelectItem>
-            <SelectItem value="Not Qualified">Not Qualified</SelectItem>
-          </SelectContent>
-        </Select>
         {/* Removed inline Open Sheet button under selector */}
       </div>
 
