@@ -11,6 +11,21 @@ export const metadata: Metadata = {
   title: "Outcruit",
   description: "Recruitment workflow automation",
   generator: "v0.app",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://outcruit-v2.vercel.app"),
+  openGraph: {
+    title: "Outcruit",
+    description: "Recruitment workflow automation",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://outcruit-v2.vercel.app",
+    siteName: "Outcruit",
+    images: [{ url: "/opengraph-image" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Outcruit",
+    description: "Recruitment workflow automation",
+    images: ["/opengraph-image"],
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

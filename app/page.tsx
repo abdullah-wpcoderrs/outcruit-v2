@@ -1,56 +1,23 @@
-"use client"
+// Server Component version of the home page. It checks the authentication
+// cookie on the server and redirects before any client-side paint.
+import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
+import { verifyToken } from "@/lib/auth"
+import LoginWrapper from "./login-wrapper"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import LoginPage from "@/components/login-page"
+export default async function Page() {
+  // Read the auth token from cookies at request time
+  const cookieStore = cookies()
+  const token = cookieStore.get('auth_token')?.value
 
-export default function Page() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
-
-  useEffect(() => {
-    // Check current session
-    const checkSession = async () => {
-      try {
-        const res = await fetch('/api/auth/me')
-        if (res.ok) {
-          const data = await res.json()
-          if (data.user) {
-            setIsLoggedIn(true)
-            setUserId(data.user.id)
-            router.push('/dashboard')
-          }
-        }
-      } catch (error) {
-        console.error('Session check failed', error)
-      } finally {
-        setIsLoading(false)
-      }
+  // If we have a token, verify it on the server and redirect to dashboard
+  if (token) {
+    const payload = await verifyToken(token)
+    if (payload) {
+      redirect('/dashboard')
     }
-
-    checkSession()
-  }, [router])
-
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
-          <p className="text-foreground">Loading...</p>
-        </div>
-      </div>
-    )
   }
 
-  return (
-    <LoginPage
-      onLogin={(id) => {
-        setIsLoggedIn(true)
-        setUserId(id)
-        router.push('/dashboard')
-      }}
-    />
-  )
+  // Not logged in: render the client-side login wrapper immediately
+  return <LoginWrapper />
 }
